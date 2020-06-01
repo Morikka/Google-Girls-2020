@@ -8,6 +8,7 @@
 
 # Data part
 + [todo] Automatically get data from government 
++ [todo] Store data into database
 
 # Report part
 (ref: https://events.withgoogle.com/google-girl-hackathon-cn/submission-instructions/#content)
