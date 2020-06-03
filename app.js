@@ -1,10 +1,18 @@
+'use strict';
+
 const express = require("express");
 const got = require('got');
 const jwt = require('jsonwebtoken');
 const app = express();
-const MongoClient = require('mongodb').MongoClient;
+// const MongoClient = require('mongodb').MongoClient;
 var assert = require('assert');
 const mongoose = require('mongoose');
+const events = require('events');
+const update_data = require('./update_data');
+//Emitter file
+const emitterFile = require('./my_emitter');
+const myEmitter = emitterFile.emitter;
+
 // The database part
 const url = "mongodb+srv://mio:Jcu3gbEBnzhd3BHL@ggirls-rw5nh.gcp.mongodb.net/test?retryWrites=true&w=majority";
 const dbName = 'ggirls';
@@ -14,6 +22,7 @@ db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
     console.log("we're connected!");
 });
+
 // The authorization part
 let certs;
 let aud;
@@ -93,21 +102,32 @@ app.set("view options", {layout: false});
 app.use('/', express.static(__dirname));
 
 app.get('/', async (req, res) => {
-    const assertion = req.header('X-Goog-IAP-JWT-Assertion');
-    let email = 'None';
-    let userid = 'None';
-    try {
-        const info = await validateAssertion(assertion);
-        email = info.email;
-        userid = info.sub;
-    } catch (error) {
-        console.log(error);
-    }
-    console.log(email,userid);
+    // const assertion = req.header('X-Goog-IAP-JWT-Assertion');
+    // let email = 'None';
+    // let userid = 'None';
+    // try {
+    //     const info = await validateAssertion(assertion);
+    //     email = info.email;
+    //     userid = info.sub;
+    // } catch (error) {
+    //     console.log(error);
+    // }
+    // console.log(email,userid);
     // await getUserInfo(email);
     res.render('index.html');
 });
 
+app.get('/api/update_data', (req,res)=>{
+    update_data.auto_run();
+    res.sendStatus(200);
+});
+
+//event part
+myEmitter.on('update_data', (res) => {
+    console.log(res);
+    console.log('worked!');
+});
+// setTimeout(console.log, 5000, 'Done');
 
 // Start the server
 const PORT = process.env.PORT || 8080;
