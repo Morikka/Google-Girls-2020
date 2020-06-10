@@ -30,8 +30,7 @@ app.get('/', async (req, res) => {
     //     console.log(error);
     // }
     // console.log(email,userid);
-    // await db.getUserID(email);
-    db.findPlace();
+    await db.getUserID(email);
     res.render('index.html');
 });
 
