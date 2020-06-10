@@ -17,11 +17,11 @@ app.set('views', __dirname+'/views');
 app.set("view options", {layout: false});
 app.use('/', express.static(__dirname));
 
-//Check user  firstly
+//Check user firstly
 app.get('/', async (req, res) => {
     const assertion = req.header('X-Goog-IAP-JWT-Assertion');
     let email = 'None';
-    let userid = 'None';
+    // let userid = 'None';
     // try {
         // const info = await validate.validateAssertion(assertion);
         // email = info.email;
@@ -30,7 +30,8 @@ app.get('/', async (req, res) => {
     //     console.log(error);
     // }
     // console.log(email,userid);
-    await db.getUserInfo(email);
+    // await db.getUserID(email);
+    db.findPlace();
     res.render('index.html');
 });
 

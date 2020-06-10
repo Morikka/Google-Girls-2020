@@ -46,7 +46,7 @@
     ]
 }
 ```
-+ place
++ Place
 ```json
 {
     "_id":"place_id",
@@ -58,11 +58,17 @@
     "flag": "bool",
     "cases": [
       {
-          "case_id": "Case Number",
-          "start_date": "Start date",
-          "end_date": "End date"
+          "case_id": "case_id"
       }
     ]
+}    
+```
+Case
+```json
+{
+     "case_id": "Case Number",
+     "start_date": "Start date",
+     "end_date": "End date"
 }    
 ```
 
