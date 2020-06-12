@@ -5,8 +5,12 @@ const https = require('https');
 const qs = require('qs');
 
 // The database part
-const url = "mongodb+srv://mio:Jcu3gbEBnzhd3BHL@ggirls-rw5nh.gcp.mongodb.net/test?retryWrites=true&w=majority";
-const dbName = 'ggirls';
+// const dbName = 'ggirls';
+// use test database first
+
+const dbName = 'test';
+const url = "mongodb+srv://mio:Jcu3gbEBnzhd3BHL@ggirls-rw5nh.gcp.mongodb.net/"+dbName+"?retryWrites=true&w=majority";
+
 mongoose.connect(url, {useNewUrlParser: true, useUnifiedTopology: true});
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
@@ -46,56 +50,98 @@ var caseSchema = new mongoose.Schema({
 async function getUserID(email){
     var User = mongoose.model('users',userSchema);
     var user = new User({email:email});
-    var userID;
+    var userID = null;
     // find user
-    User.findOne({email:email},(err,docs)=>{
+    await User.findOne({email:email},(err,docs)=>{
         if(err) return console.error(err);
-        console.log(docs);
         //If user doesn't exist
-        if(docs.length===0){
-             user.save((err,user)=>{
+        if(docs===null || docs.length===0){
+             user.save((err)=>{
                 if (err) return console.error(err);
-                console.log(user);
+                // console.log("user inserted");
             });
             userID = user._id;
         } else {
             userID = docs._id;
         }
-        console.log(userID);
     });
+    return userID;
 }
 
-function findPlace(input){
+async function findPlace(input){
     var query = {
         key:"AIzaSyCfEfBinkiInzbXiapMhgpsXpN03Q3dSGc",
         input:input,
-        inputtype:"textquery"
+        inputtype:"textquery",
+        fields:"geometry,name,place_id"
     }
     var options = {
         host: 'maps.googleapis.com',
         path:'/maps/api/place/findplacefromtext/json?'+qs.stringify(query),
         method: 'GET'
     }
-    var req = https.get(options, function(res) {
-        // console.log('STATUS: ' + res.statusCode);
-        // console.log('HEADERS: ' + JSON.stringify(res.headers));
+    var body = null;
+    var json = {};
+    return new Promise((resolve, reject) => {
+        var req = https.get(options, function(res) {
+            // console.log('STATUS: ' + res.statusCode);
+            // console.log('HEADERS: ' + JSON.stringify(res.headers));
+            // Buffer the body entirely for processing as a whole.
+            var bodyChunks = [];
+            res.on('data', function(chunk) {
+                // You can process streamed parts here...
+                bodyChunks.push(chunk);
+            }).on('end', function() {
+                body = Buffer.concat(bodyChunks);
+                var tmp = body.toString('utf8');
+                var tmp = JSON.parse(tmp);
+                console.log(tmp);
+                if(tmp['status']==='ZERO_RESULTS'){
+                    json["status"] = 0;
+                }else{
+                    tmp = tmp["candidates"][0];
+                    json["status"] = 1;
+                    json["mapName"] = tmp["name"];
+                    json["mapID"] = tmp["place_id"];
+                    json["geometry"] = tmp["geometry"]["location"];
+                }
+                resolve(json);
+            })
+        });
+        req.on('error', function(e) {
+            reject(e);
+        });
+    });
+};
 
-        // Buffer the body entirely for processing as a whole.
-        var bodyChunks = [];
-        res.on('data', function(chunk) {
-            // You can process streamed parts here...
-            bodyChunks.push(chunk);
-        }).on('end', function() {
-            var body = Buffer.concat(bodyChunks);
-            console.log('BODY: ' + body);
-            // ...and/or process the entire body here
-        })
+// type
+// 1 -> home
+// 2 -> work
+// 3 -> fav places
+// 4 -> visited (have day)
+async function setPlace(userID,place,type,msg=null){
+    var Place = mongoose.model('places',placeSchema);
+    var place = new Place({map_id: place});
+    var placeID = null;
+    // find place in db
+    await Place.findOne({map_id: place},(err,docs)=>{
+        if(err) return console.error(err);
+        // place doesn't exist
+        if(docs===null || docs.length===0){
+            place.save(err=>{
+                if (err) return console.error(err);
+            });
+            placeID = place._id;
+        } else{
+            placeID = docs._id;
+        }
     });
 
-    req.on('error', function(e) {
-        console.log('ERROR: ' + e.message);
-    });
+   // if(type===1){
+   //     var res = await User.updateOne({_id:UserID},{home:placeID});
+   //  }
 }
 
 exports.getUserID = getUserID;
 exports.findPlace = findPlace;
+exports.setPlace = setPlace;

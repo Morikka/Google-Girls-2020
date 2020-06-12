@@ -120,3 +120,23 @@ https://www.compose.com/articles/connection-pooling-with-mongodb/
 
     -  Step 1: run `node cron_test.js`
     -  Step 2: Open 'https://0.0.0.0:8080/api/update_data' in browser.
+    
+## For frontpage:
++ Get data through `socket.io`:
+```js
+var socket = io.connect('ws://localhost:3000');
+```
++ `/search` 
+Use /search to search a place using its name, and the return example is as follows:
+(Note that this API can only find one place).
+
+If the status = 0 -> Google map API cannot find a place.
+
+```json
+{
+  "mapName": "香港城市大學",
+  "mapID": "ChIJNe_zADQHBDQRWakL-09wYes",
+  "geometry": { "lat": 22.3366793, "lng": 114.1724234 },
+  "status": 1
+}
+```
