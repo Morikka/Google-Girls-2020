@@ -12,15 +12,15 @@ const dbName = 'test';
 const url = "mongodb+srv://mio:Jcu3gbEBnzhd3BHL@ggirls-rw5nh.gcp.mongodb.net/"+dbName+"?retryWrites=true&w=majority";
 
 mongoose.connect(url, {useNewUrlParser: true, useUnifiedTopology: true});
-var db = mongoose.connection;
+const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
     console.log("we're connected!");
 });
 
-var SchemaTypes = mongoose.Schema.Types;
+const SchemaTypes = mongoose.Schema.Types;
 
-var userSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema({
     email: String,
     home: {type:String, ref:'Place'},
     work: {type:String, ref:'Place'},
@@ -31,8 +31,10 @@ var userSchema = new mongoose.Schema({
     }]
 })
 
-var placeSchema = new mongoose.Schema({
-    map_id:String,
+const placeSchema = new mongoose.Schema({
+    mapID:String,
+    status:String,
+    mapName:String,
     geometry:{
         lat: SchemaTypes.Double,
         lng: SchemaTypes.Double
@@ -41,14 +43,16 @@ var placeSchema = new mongoose.Schema({
     cases: [{case:{ type: Date, default: Date.now }}]
 })
 
-var caseSchema = new mongoose.Schema({
+const caseSchema = new mongoose.Schema({
     case_id: String,
     "start_date": { type: Date, default: Date.now },
     "end_date": { type: Date, default: Date.now }
 })
+const User = mongoose.model('users',userSchema);
+const Place = mongoose.model('places',placeSchema);
 
 async function getUserID(email){
-    var User = mongoose.model('users',userSchema);
+
     var user = new User({email:email});
     var userID = null;
     // find user
@@ -68,7 +72,7 @@ async function getUserID(email){
     return userID;
 }
 
-async function findPlace(input){
+async function searchPlace(input){
     var query = {
         key:"AIzaSyCfEfBinkiInzbXiapMhgpsXpN03Q3dSGc",
         input:input,
@@ -97,10 +101,10 @@ async function findPlace(input){
                 var tmp = JSON.parse(tmp);
                 console.log(tmp);
                 if(tmp['status']==='ZERO_RESULTS'){
-                    json["status"] = 0;
+                    json["status"] = 'ZERO_RESULTS';
                 }else{
+                    json["status"] = tmp['status'];
                     tmp = tmp["candidates"][0];
-                    json["status"] = 1;
                     json["mapName"] = tmp["name"];
                     json["mapID"] = tmp["place_id"];
                     json["geometry"] = tmp["geometry"]["location"];
@@ -112,7 +116,34 @@ async function findPlace(input){
             reject(e);
         });
     });
+}
+async function findPlace(input){
+    var place = 'None';
+    await Place.find({name:input},(err,docs) =>{
+        place = docs;
+    });
+    if (place = 'None'){
+        place = await searchPlace(input);
+        place = await savePlace(place);
+    };
+    return place;
 };
+async function savePlace(place){
+    var place_res = null;
+    await Place.findOne({mapID: place["mapID"]},(err,docs)=>{
+        if(err) return console.error(err);
+        // place doesn't exist
+        if(docs===null || docs.length===0){
+            place_res = new Place(place);
+            place_res.save(err=>{
+                if (err) return console.error(err);
+            });
+        } else {
+            place_res = docs;
+        }
+    });
+    return place_res;
+}
 
 // type
 // 1 -> home
@@ -120,22 +151,6 @@ async function findPlace(input){
 // 3 -> fav places
 // 4 -> visited (have day)
 async function setPlace(userID,place,type,msg=null){
-    var Place = mongoose.model('places',placeSchema);
-    var place = new Place({map_id: place});
-    var placeID = null;
-    // find place in db
-    await Place.findOne({map_id: place},(err,docs)=>{
-        if(err) return console.error(err);
-        // place doesn't exist
-        if(docs===null || docs.length===0){
-            place.save(err=>{
-                if (err) return console.error(err);
-            });
-            placeID = place._id;
-        } else{
-            placeID = docs._id;
-        }
-    });
 
    // if(type===1){
    //     var res = await User.updateOne({_id:UserID},{home:placeID});

@@ -35,20 +35,24 @@ app.get('/', async (req, res) => {
     } catch (error) {
         console.log(error);
     }
-    // console.log(email,userid);
+    // console.log(email);
+    // local env cannot get email
+    if (email===undefined){
+        email='test@t.t'
+    }
     userID = await db.getUserID(email);
     res.render('index.html');
 });
 
 app.get('/test', async (req,res) =>{
-    let email = 'None';
+    let email='test@t.t';
     userID = await db.getUserID(email);
     res.render('test.html');
 });
 
 io.on('connection', (socket) => {
     console.log('a user connected');
-    var place = 'TEST';
+    var place = null;
 
     socket.on("disconnect", () => {
         console.log("a user go out");
@@ -59,8 +63,8 @@ io.on('connection', (socket) => {
         console.log('user ID: ' + userID);
         console.log('search: ' + msg);
         place = await db.findPlace(msg);
-        console.log("place_id: ",place);
-        socket.emit('searchRes',place);
+        console.log("Place is", place);
+        socket.emit('searchRes', place);
     });
     socket.on('setHome',(msg) =>{
         console.log("Set Home: ",place);

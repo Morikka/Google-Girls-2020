@@ -50,7 +50,8 @@
 ```json
 {
     "_id":"place_id",
-    "mapid":"Google MAP API",
+    "mapID":"Google MAP API", 
+    "mapName": "Google MAP API",
     "geometry": {
       "lat": "latitude",
       "lng": "longitude"
@@ -60,7 +61,8 @@
       {
           "case_id": "case_id"
       }
-    ]
+    ],
+    "status": "Google MAP API"
 }    
 ```
 Case
@@ -130,13 +132,20 @@ var socket = io.connect('ws://localhost:3000');
 Use /search to search a place using its name, and the return example is as follows:
 (Note that this API can only find one place).
 
-If the status = 0 -> Google map API cannot find a place.
+If the `status: 'ZERO_RESULTS'` -> Google map API cannot find a place.
 
 ```json
 {
+  "status": "OK",
   "mapName": "香港城市大學",
   "mapID": "ChIJNe_zADQHBDQRWakL-09wYes",
   "geometry": { "lat": 22.3366793, "lng": 114.1724234 },
-  "status": 1
+  "_id":"place_id",
+  "flag": "bool",
+  "cases": [
+    {
+        "case_id": "case_id"
+    }
+  ]
 }
 ```
