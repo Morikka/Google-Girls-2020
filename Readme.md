@@ -62,7 +62,8 @@
           "case_id": "case_id"
       }
     ],
-    "status": "Google MAP API"
+    "status": "Google MAP API",
+    "tupes": ["Place Types"],
 }    
 ```
 Case
@@ -146,6 +147,29 @@ If the `status: 'ZERO_RESULTS'` -> Google map API cannot find a place.
     {
         "case_id": "case_id"
     }
-  ]
+  ],
+  "types": "Place Types"
 }
 ```
+
+### Before public the project
++ change google keys
+https://console.cloud.google.com/google/maps-apis/credentials?project=ggirls
++ change mongodb password from database access
+https://cloud.mongodb.com/v2/5ece2093fb2ebe19b7236bdc#security/database/users
+
+
+
+
+
+### Google map search API
+
++ Nearby Search
++ Text Search
++ Find Place Search
+
+Nearby Search and Text Search return all of the available data fields for the selected place 
+(a subset of the supported fields), and you will be billed accordingly There is no way to constrain 
+Nearby Search or Text Search to only return specific fields.
+
+Place Types: https://developers.google.com/places/web-service/supported_types

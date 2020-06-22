@@ -40,7 +40,8 @@ const placeSchema = new mongoose.Schema({
         lng: SchemaTypes.Double
     },
     flag:Boolean,
-    cases: [{case:{ type: Date, default: Date.now }}]
+    cases: [{case:{ type: Date, default: Date.now }}],
+    types: [{ type: String }]
 })
 
 const caseSchema = new mongoose.Schema({
@@ -77,7 +78,7 @@ async function searchPlace(input){
         key:"AIzaSyCfEfBinkiInzbXiapMhgpsXpN03Q3dSGc",
         input:input,
         inputtype:"textquery",
-        fields:"geometry,name,place_id"
+        fields:"geometry,name,place_id,types"
     }
     var options = {
         host: 'maps.googleapis.com',
@@ -108,6 +109,7 @@ async function searchPlace(input){
                     json["mapName"] = tmp["name"];
                     json["mapID"] = tmp["place_id"];
                     json["geometry"] = tmp["geometry"]["location"];
+                    json["types"] = tmp["types"];
                 }
                 resolve(json);
             })
@@ -117,6 +119,46 @@ async function searchPlace(input){
         });
     });
 }
+
+// Search all places by text search API (like wellcome, blabla).
+function textSearch(input){
+    var query = {
+        key:"AIzaSyCfEfBinkiInzbXiapMhgpsXpN03Q3dSGc",
+        query:input+" in Hong Kong",
+        // region:"hk",
+    }
+    var options = {
+        host: 'maps.googleapis.com',
+        path:'/maps/api/place/textsearch/json?'+qs.stringify(query),
+        method: 'GET'
+    }
+    var body = null;
+    https.get(options,  function(res) {
+        // console.log('STATUS: ' + res.statusCode);
+        // console.log('HEADERS: ' + JSON.stringify(res.headers));
+        // Buffer the body entirely for processing as a whole.
+        var bodyChunks = [];
+        res.on('data', function(chunk) {
+            // You can process streamed parts here...
+            bodyChunks.push(chunk);
+        }).on('end', function() {
+            body = Buffer.concat(bodyChunks);
+            var tmp = body.toString('utf8');
+            tmp = JSON.parse(tmp);
+            for (var item in tmp["results"]){
+                console.log(tmp["results"][item]);
+                var json = {};
+                json["mapID"] = tmp["results"][item]["place_id"];
+                json["mapName"] = tmp["results"][item]["name"];
+                json["status"] = tmp["status"];
+                json["geometry"] = tmp["results"][item]["geometry"]["location"];
+                json["types"] = tmp["results"][item]["types"];
+                savePlace(json);
+            }
+        });
+    });
+}
+
 async function findPlace(input){
     var place = 'None';
     await Place.find({name:input},(err,docs) =>{
@@ -157,6 +199,15 @@ async function setPlace(userID,place,type,msg=null){
    //  }
 }
 
+// update Place from ...?
+async function updatePlace(){
+
+}
+
 exports.getUserID = getUserID;
 exports.findPlace = findPlace;
 exports.setPlace = setPlace;
+exports.updatePlace = updatePlace;
+
+// private
+exports.textSearch = textSearch;
