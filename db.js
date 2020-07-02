@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+// const mongoose = require('mongoose').set('debug', true);
 require('mongoose-double')(mongoose);
 
 const https = require('https');
@@ -22,11 +23,12 @@ const SchemaTypes = mongoose.Schema.Types;
 
 const userSchema = new mongoose.Schema({
     email: String,
-    home: {type:String, ref:'Place'},
-    work: {type:String, ref:'Place'},
-    fav_places : [{place:{type:String, ref:'Place'}}],
-    visited:[{
-        vis_place:{type:String, ref:'Place'},
+    home: {type:SchemaTypes.ObjectId, ref:'Place'},
+    work: {type:SchemaTypes.ObjectId, ref:'Place'},
+    fav_places : [{fav_place:{type:SchemaTypes.ObjectId, ref:'Place'}}],
+    // fav_places : [{type:SchemaTypes.ObjectId, ref:'Place'}],
+    vis_places:[{
+        vis_place:{type:SchemaTypes.ObjectId, ref:'Place'},
         vis_date:{type: Date, default: Date.now}
     }]
 })
@@ -52,25 +54,26 @@ const caseSchema = new mongoose.Schema({
 const User = mongoose.model('users',userSchema);
 const Place = mongoose.model('places',placeSchema);
 
-async function getUserID(email){
-
-    var user = new User({email:email});
-    var userID = null;
-    // find user
-    await User.findOne({email:email},(err,docs)=>{
-        if(err) return console.error(err);
-        //If user doesn't exist
-        if(docs===null || docs.length===0){
-             user.save((err)=>{
-                if (err) return console.error(err);
-                // console.log("user inserted");
-            });
-            userID = user._id;
-        } else {
-            userID = docs._id;
-        }
+async function getUser(email){
+    return new Promise(async (resolve,reject) => {
+        let user = new User({email:email});
+        let userID = null;
+        // find user
+        await User.findOne({email:email},(err,docs)=>{
+            if(err) reject(err);
+            //If user doesn't exist
+            if(docs===null || docs.length===0){
+                 user.save((err)=>{
+                    if (err) reject(err);
+                });
+                userID = user;
+            } else {
+                userID = docs;
+            }
+        }).then(()=>{
+            resolve(userID);
+        });
     });
-    return userID;
 }
 
 async function searchPlace(input){
@@ -160,53 +163,106 @@ function textSearch(input){
 }
 
 async function findPlace(input){
-    var place = 'None';
-    await Place.find({name:input},(err,docs) =>{
-        place = docs;
+    return new Promise(async (resolve,reject) => {
+        var place = 'None';
+        await Place.find({mapName:input}, (err,docs) =>{
+            if(err) reject(err);
+            console.log("Find place in database");
+            place = docs;
+        }).then(async ()=>{
+            if (place.length===0) {
+                searchPlace(input).then(x=>savePlace(x)).then(x=>{
+                    resolve([x])
+                });
+                console.log("Find place in API");
+            } else resolve(place);
+        });
     });
-    if (place = 'None'){
-        place = await searchPlace(input);
-        place = await savePlace(place);
-    };
-    return place;
 };
+
 async function savePlace(place){
-    var place_res = null;
+    return new Promise(async (resolve,reject) =>{
+    let place_res = null;
     await Place.findOne({mapID: place["mapID"]},(err,docs)=>{
-        if(err) return console.error(err);
+        if(err) return reject(err);
         // place doesn't exist
         if(docs===null || docs.length===0){
             place_res = new Place(place);
             place_res.save(err=>{
-                if (err) return console.error(err);
+                if (err) reject(err);
             });
         } else {
             place_res = docs;
         }
+    }).then(()=>{
+            resolve(place_res);
+        });
     });
-    return place_res;
 }
 
 // type
 // 1 -> home
 // 2 -> work
 // 3 -> fav places
-// 4 -> visited (have day)
-async function setPlace(userID,place,type,msg=null){
+// 4 -> visited places (have day)
 
-   // if(type===1){
-   //     var res = await User.updateOne({_id:UserID},{home:placeID});
-   //  }
+async function setPlace(userID,placeID,type,date=null){
+    return new Promise(async (resolve,reject) =>{
+        let result = {
+            n:0,
+            nModified:0
+        };
+        if(type===1){
+           const res = await User.updateOne({_id:userID},{home:placeID});
+           result["n"] = res.n;
+           result["nModified"] = res.nModified;
+            resolve(result);
+        }
+        if(type===2){
+            const res = await User.updateOne({_id:userID},{work:placeID});
+            result["n"] = res.n;
+            result["nModified"] = res.nModified;
+            resolve(result);
+        }
+        if(type===3){
+            let item = {fav_place:placeID};
+            User.findOne({_id:userID,"fav_places.fav_place":placeID},async (err,docs)=>{
+                if(docs===null || docs.length==0){
+                    const res = await User.updateOne({_id:userID},{$addToSet:{fav_places:item}});
+                    result["n"] = res.n;
+                    result["nModified"] = res.nModified;
+                } else {
+                    result["n"] = 1;
+                    result["nModified"] = 0;
+                }
+                resolve(result);
+            });
+        }
+        if(type===4){
+            let item = {vis_place:placeID,vis_date:date};
+            User.findOne({_id:userID,"vis_places.vis_place":placeID,"vis_places.vis_date":date},async (err,docs)=>{
+                if(docs===null || docs.length===0){
+                    const res = await User.updateOne({_id:userID},{$addToSet:{vis_places:item}});
+                    result["n"] = res.n;
+                    result["nModified"] = res.nModified;
+                } else {
+                    result["n"] = 1;
+                    result["nModified"] = 0;
+                }
+                resolve(result);
+            });
+        }
+    });
 }
 
-// update Place from ...?
+// update place from cases;
 async function updatePlace(){
 
 }
 
-exports.getUserID = getUserID;
-exports.findPlace = findPlace;
+exports.getUser = getUser;
 exports.setPlace = setPlace;
+exports.findPlace = findPlace;
 exports.updatePlace = updatePlace;
 
 // private

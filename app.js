@@ -40,13 +40,15 @@ app.get('/', async (req, res) => {
     if (email===undefined){
         email='test@t.t'
     }
-    userID = await db.getUserID(email);
+    var user = await db.getUser(email);
+    userID = user["_id"];
     res.render('index.html');
 });
 
 app.get('/test', async (req,res) =>{
     let email='test@t.t';
-    userID = await db.getUserID(email);
+    var user = await db.getUser(email);
+    userID = user["_id"];
     res.render('test.html');
 });
 
@@ -78,6 +80,9 @@ io.on('connection', (socket) => {
     });
     socket.on('setVisited',(msg)=>{
         db.setPlace(userID,place,4,msg);
+    });
+    socket.on('set',(msg)={
+        // db.setPlace(userID,msg['place'],msg['type']);
     });
 });
 
