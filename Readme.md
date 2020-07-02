@@ -28,12 +28,12 @@
    "email":"user_email",
    "home":"place_id",
    "work":"place_id",
-   "favplaces":
+   "fav_places":
    [
         {"fav_place":"place_id"},
         {"fav_place":"place_id"}
    ],
-    "visplaces":
+    "vis_places":
     [
         {
             "vis_place":"place_id",
@@ -71,8 +71,8 @@ Case
 {
      "case_id": "Case Number",
      "start_date": "Start date",
-     "end_date": "End date"
-}    
+     "end_date": "End date" 
+}
 ```
 
 # Google Cloud
