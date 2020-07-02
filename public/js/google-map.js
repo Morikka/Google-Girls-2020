@@ -7,9 +7,9 @@ script.async = true;
 // Attach your callback function to the `window` object
 window.initMap = function() {
     var map = new google.maps.Map(document.getElementById('map'), {
-                center: { lat: 34.397, lng: 150.644 },
+                center: { lat: 22.396881, lng: 114.155160 },
                 scrollwheel: false,
-                zoom: 2
+                zoom: 11
     });
 };
 // google.setOnLoadCallback(initialize);
