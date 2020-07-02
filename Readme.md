@@ -33,7 +33,7 @@
         {"fav_place":"place_id"},
         {"fav_place":"place_id"}
    ],
-    "visited":
+    "visplaces":
     [
         {
             "vis_place":"place_id",
