@@ -74,6 +74,12 @@ io.on('connection', (socket) => {
     //get user Info
     socket.emit('user',user);
 
+    socket.on("getPlaceByID",async (msg) => {
+        place = await db.getPlaceByID(msg);
+        console.log("Place is", place);
+        socket.emit('searchRes', place);
+    })
+
     socket.on('set',(msg) =>{
         console.log("Set Home: ",place);
         db.setPlace(userID,place,1);
