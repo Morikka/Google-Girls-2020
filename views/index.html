@@ -25,6 +25,8 @@
     <!-- map settings -->
     <link href="public/css/google-map.css" rel="stylesheet" type="text/css">
     <script src="public/js/google-map.js"></script>
+
+    <script src="public/js/markerclusterer.js" type="text/javascript"></script>
 </head>
 
 <body id="page-top">
@@ -257,17 +259,35 @@ $("#btn_search").click(function(event) {
     return false;
 });
 socket.on('searchRes',(data)=>{
-    console.log(data);
-    if(data["status"] === 'OK') {
-        var loc = data["geometry"];
-        var uluru = loc;
+    //console.log(data);
+    if(data[0]["status"] === 'OK') {
+        var locations = [];
+        var uluru = data[0]["geometry"];
+        //console.log(uluru);
+        for(var i = 0, len = data.length; i < len; i++){
+            var loc = data[i]["geometry"];
+            //console.log(loc);
+            locations.push(loc);
+        }
         var map = new google.maps.Map(
             document.getElementById('map'), {zoom: 15, center: uluru});
-        var marker = new google.maps.Marker({position: uluru, map: map});
+
+        var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+        var markers = locations.map(function(location, j) {
+            return new google.maps.Marker({
+                position: location,
+                label: labels[j % labels.length]
+            });
+        });
+
+        var markerCluster = new MarkerClusterer(map, markers,
+            {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
     } else {
         alert("No such place!");
     }
 });
+
 function change_location(){
     var uluru = {lat: -25.344, lng: 131.036};
     var map = new google.maps.Map(
