@@ -23,12 +23,12 @@ const SchemaTypes = mongoose.Schema.Types;
 
 const userSchema = new mongoose.Schema({
     email: String,
-    home: {type:SchemaTypes.ObjectId, ref:'Place'},
-    work: {type:SchemaTypes.ObjectId, ref:'Place'},
-    fav_places : [{fav_place:{type:SchemaTypes.ObjectId, ref:'Place'}}],
+    home: {type:SchemaTypes.ObjectId, ref:'places'},
+    work: {type:SchemaTypes.ObjectId, ref:'places'},
+    fav_places : [{fav_place:{type:SchemaTypes.ObjectId, ref:'places'}}],
     // fav_places : [{type:SchemaTypes.ObjectId, ref:'Place'}],
     vis_places:[{
-        vis_place:{type:SchemaTypes.ObjectId, ref:'Place'},
+        vis_place:{type:SchemaTypes.ObjectId, ref:'places'},
         vis_date:{type: Date, default: Date.now}
     }]
 })
@@ -42,17 +42,21 @@ const placeSchema = new mongoose.Schema({
         lng: SchemaTypes.Double
     },
     flag:Boolean,
-    cases: [{case:{ type: Date, default: Date.now }}],
+    cases: [{case:{type:SchemaTypes.ObjectId, ref:'cases'}}],
     types: [{ type: String }]
 })
 
 const caseSchema = new mongoose.Schema({
     case_id: String,
-    "start_date": { type: Date, default: Date.now },
-    "end_date": { type: Date, default: Date.now }
+    place_and_date:[{
+        place: {type:SchemaTypes.ObjectId, ref:'places'},
+        start_date: { type: Date, default: Date.now },
+        end_date: { type: Date, default: Date.now }
+    }]
 })
 const User = mongoose.model('users',userSchema);
 const Place = mongoose.model('places',placeSchema);
+const Case = mongoose.model('cases',caseSchema)
 
 async function getUser(email){
     return new Promise(async (resolve,reject) => {
@@ -76,6 +80,25 @@ async function getUser(email){
     });
 }
 
+// async function getInfo(email){
+//     return new Promise(async (resolve,reject) => {
+//         await User.findOne({email:email}).populate('home','work').exec((err,data)=>{
+//             if(err) reject(err);
+//             console.log(data);
+//             resolve(data);
+//         })
+//     });
+// }
+
+async function getPlaceByID(id){
+    console.log("ID is: ",id);
+    return new Promise(async (resolve,reject) => {
+        await Place.findOne({_id: id}, (err, data) => {
+            if (err) reject(err);
+            resolve(data);
+        });
+    });
+}
 async function searchPlace(input){
     var query = {
         key:"AIzaSyCfEfBinkiInzbXiapMhgpsXpN03Q3dSGc",
@@ -149,7 +172,7 @@ function textSearch(input){
             var tmp = body.toString('utf8');
             tmp = JSON.parse(tmp);
             for (var item in tmp["results"]){
-                console.log(tmp["results"][item]);
+                // console.log(tmp["results"][item]);
                 var json = {};
                 json["mapID"] = tmp["results"][item]["place_id"];
                 json["mapName"] = tmp["results"][item]["name"];
@@ -162,6 +185,25 @@ function textSearch(input){
     });
 }
 
+// async function findPlace(input){
+//     return new Promise(async (resolve,reject) => {
+//         var place = 'None';
+//         await Place.find({mapName:input}, (err,docs) =>{
+//             if(err) reject(err);
+//             console.log("Find place in database");
+//             place = docs;
+//
+//         }).then(async ()=>{
+//             if (place.length===0) {
+//                 searchPlace(input).then(x=>savePlace(x)).then(x=>{
+//                     console.log("Find place in API");
+//                     resolve([x]);
+//                 });
+//             } else resolve(place);
+//         });
+//     });
+// };
+
 async function findPlace(input){
     return new Promise(async (resolve,reject) => {
         var place = 'None';
@@ -169,14 +211,16 @@ async function findPlace(input){
             if(err) reject(err);
             console.log("Find place in database");
             place = docs;
-        }).then(async ()=>{
-            if (place.length===0) {
-                searchPlace(input).then(x=>savePlace(x)).then(x=>{
-                    resolve([x])
-                });
+        })
+        if (place.length===0) {
+            searchPlace(input).then(x=>savePlace(x)).then(x=>{
                 console.log("Find place in API");
-            } else resolve(place);
-        });
+                resolve([x]);
+            });
+        } else {
+            resolve(place);
+            console.log("???",place);
+        }
     });
 };
 
@@ -216,7 +260,7 @@ async function setPlace(userID,placeID,type,date=null){
            const res = await User.updateOne({_id:userID},{home:placeID});
            result["n"] = res.n;
            result["nModified"] = res.nModified;
-            resolve(result);
+           resolve(result);
         }
         if(type===2){
             const res = await User.updateOne({_id:userID},{work:placeID});
@@ -252,6 +296,7 @@ async function setPlace(userID,placeID,type,date=null){
                 resolve(result);
             });
         }
+
     });
 }
 
@@ -260,10 +305,25 @@ async function updatePlace(){
 
 }
 
+function checkPlace(){
+
+}
+
+async function addCase(){
+
+}
+
 exports.getUser = getUser;
+// exports.getInfo = getInfo;
+
 exports.setPlace = setPlace;
 exports.findPlace = findPlace;
 exports.updatePlace = updatePlace;
+exports.checkPlace = checkPlace;
 
 // private
 exports.textSearch = textSearch;
+exports.addCase = addCase;
+
+//getByID
+exports.getPlaceByID = getPlaceByID;

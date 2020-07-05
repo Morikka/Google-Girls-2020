@@ -70,8 +70,11 @@ Case
 ```json
 {
      "case_id": "Case Number",
-     "start_date": "Start date",
-     "end_date": "End date" 
+     "place_and_date": [{
+          "place": "Place",
+          "start_date": "Start date",
+          "end_date": "End date"
+      }]
 }
 ```
 

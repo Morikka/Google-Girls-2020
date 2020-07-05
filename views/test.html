@@ -25,6 +25,9 @@ $(function () {
     });
     socket.on('searchRes',(data)=>{
         console.log(data);
+    });
+    socket.on('user',(data)=>{
+        console.log(data);
     })
     // $('.t2').submit(function(e) {
     //     e.preventDefault(); // prevents page reloading

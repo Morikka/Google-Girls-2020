@@ -22,11 +22,12 @@ app.set('view engine', 'html');
 app.set('views', __dirname+'/views');
 app.set("view options", {layout: false});
 app.use('/', express.static(__dirname));
-var userID = 'None';
+var userID = "None";
+var email = "None";
+var user = "None";
 //Check user firstly
 app.get('/', async (req, res) => {
     const assertion = req.header('X-Goog-IAP-JWT-Assertion');
-    let email = 'None';
     // let userID = 'None';
     try {
         const info = await validate.validateAssertion(assertion);
@@ -40,21 +41,22 @@ app.get('/', async (req, res) => {
     if (email===undefined){
         email='test@t.t'
     }
-    var user = await db.getUser(email);
+    user = await db.getUser(email);
     userID = user["_id"];
     res.render('index.html');
 });
 
 app.get('/test', async (req,res) =>{
-    let email='test@t.t';
-    var user = await db.getUser(email);
+    email='test@t.t';
+    user = await db.getUser(email);
+    console.log(user);
     userID = user["_id"];
     res.render('test.html');
 });
 
 io.on('connection', (socket) => {
     console.log('a user connected');
-    var place = null;
+    let place = null;
 
     socket.on("disconnect", () => {
         console.log("a user go out");
@@ -68,21 +70,13 @@ io.on('connection', (socket) => {
         console.log("Place is", place);
         socket.emit('searchRes', place);
     });
-    socket.on('setHome',(msg) =>{
+
+    //get user Info
+    socket.emit('user',db.getInfo(email));
+
+    socket.on('set',(msg) =>{
         console.log("Set Home: ",place);
         db.setPlace(userID,place,1);
-    });
-    socket.on('setWork',(msg) =>{
-        db.setPlace(userID,place,2);
-    });
-    socket.on('setFavplaces',(msg) =>{
-        db.setPlace(userID,place,3);
-    });
-    socket.on('setVisited',(msg)=>{
-        db.setPlace(userID,place,4,msg);
-    });
-    socket.on('set',(msg)={
-        // db.setPlace(userID,msg['place'],msg['type']);
     });
 });
 
