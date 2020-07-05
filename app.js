@@ -72,7 +72,7 @@ io.on('connection', (socket) => {
     });
 
     //get user Info
-    socket.emit('user',db.getInfo(email));
+    socket.emit('user',db.getUser(email));
 
     socket.on('set',(msg) =>{
         console.log("Set Home: ",place);
