@@ -84,9 +84,8 @@
                 <span>Favorite Places</span>
             </a>
             <div id="collapsefavorite" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
-                <div class="bg-white py-2 collapse-inner rounded">
+                <div id="userfav" class="bg-white py-2 collapse-inner rounded">
                     <a class="collapse-item" href="#">IKEA (Kowloon Bay)</a>
-                    <a class="collapse-item" href="#">Science Park</a>
                 </div>
             </div>
         </li>
@@ -99,8 +98,10 @@
             </a>
             <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
                 <div class="bg-white py-2 collapse-inner rounded">
-                    <a class="collapse-item" href="#">IKEA (Kowloon Bay)</a>
-                    <a class="collapse-item" href="#">Science Park</a>
+                    <div class="bg-white py-2 collapse-inner rounded",id="uservis">
+                    </div>
+<!--                    <a class="collapse-item" href="#">IKEA (Kowloon Bay)</a>-->
+<!--                    <a class="collapse-item" href="#">Science Park</a>-->
                 </div>
             </div>
         </li>
@@ -274,11 +275,17 @@ socket.on('user',(data)=>{
     work_loc = data["work"];
     fav_locs = data["fav_places"];
     vis_locs = data["vis_places"];
-
+    add();
     // console.log(work_loc);
     // console.log(fav_locs);
     // console.log(vis_locs);
 });
+
+function add(){
+    //<a class="collapse-item" href="#">IKEA (Kowloon Bay)</a>
+    $("#userfav").append("<a>Test</a>");
+    // $("#uservis").append("a");
+}
 
 $("#btn_home").click(function(event) {
     event.preventDefault(); // prevents page reloading
@@ -298,7 +305,6 @@ $("#btn_home").click(function(event) {
     } else {
         alert("You should set your home address first.");
     }
-
     return false;
 });
 
@@ -306,7 +312,6 @@ $("#btn_home").click(function(event) {
 $("#btn_work").click(function(event) {
     event.preventDefault(); // prevents page reloading
     console.log("btn_work");
-
     if(work_loc){
         console.log(work_loc);
         socket.emit('getPlaceByID',work_loc);
@@ -321,7 +326,6 @@ $("#btn_work").click(function(event) {
     } else {
         alert("You should set your work address first.");
     }
-
     return false;
 });
 
