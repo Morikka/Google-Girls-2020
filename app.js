@@ -77,7 +77,7 @@ io.on('connection', (socket) => {
     socket.on("getPlaceByID",async (msg) => {
         place = await db.getPlaceByID(msg);
         console.log("Place is", place);
-        socket.emit('searchRes', place);
+        socket.emit('getPlaceByIDRes', place);
     })
 
     socket.on('set',(msg) =>{
