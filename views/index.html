@@ -79,13 +79,13 @@
         </li>
 
         <li class="nav-item">
-            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsefavorite" aria-expanded="true" aria-controls="collapseUtilities">
+            <a id="btn_fav" class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsefavorite" aria-expanded="true" aria-controls="collapseUtilities">
                 <i class="fas fa-fw fa-cog"></i>
                 <span>Favorite Places</span>
             </a>
             <div id="collapsefavorite" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
                 <div id="userfav" class="bg-white py-2 collapse-inner rounded">
-                    <a class="collapse-item" href="#">IKEA (Kowloon Bay)</a>
+<!--                    <a class="collapse-item" href="#">IKEA (Kowloon Bay)</a>-->
                 </div>
             </div>
         </li>
@@ -266,6 +266,10 @@ var home_loc;
 var work_loc;
 var fav_locs = [];
 var vis_locs = [];
+var fav_locs_add = [];
+var vis_time = [];
+var vis_locs_add = [];
+var fav_list = [];
 
 socket.on('user',(data)=>{
     console.log(data);
@@ -277,15 +281,41 @@ socket.on('user',(data)=>{
     vis_locs = data["vis_places"];
     add();
     // console.log(work_loc);
-    // console.log(fav_locs);
+    console.log(fav_locs);
     // console.log(vis_locs);
 });
 
 function add(){
     //<a class="collapse-item" href="#">IKEA (Kowloon Bay)</a>
-    $("#userfav").append("<a>Test</a>");
+    //$("#userfav").append("<a class=\"collapse-item\" href=\"#\">Test</a>");
+    if( fav_locs.length === 0) {
+        alert("You didn't add any favorite place.")
+    } else {
+        for(var i = 0, len = fav_locs.length; i < len; i++){
+            console.log("test");
+            console.log(i);
+            socket.emit('getPlaceByID',fav_locs[i]["fav_place"]);
+            var name;
+            var loc;
+
+        }
+    }
+
     // $("#uservis").append("a");
 }
+socket.on('getPlaceByIDRes',(data)=>{
+    console.log(data);
+    var name = data["mapName"];
+    var loc = data["geometry"];
+    // console.log(name);
+    // console.log(loc);
+    fav_locs_add.push(loc);
+    var i  = fav_list.length;
+    var temp = "<a class=\"collapse-item\" href=\"#\"" + "id=\"btn_fav" + i +"\"" + ">" + name + "</a>";
+    fav_list.push(temp);
+    console.log(temp);
+    $("#userfav").append(temp);
+});
 
 $("#btn_home").click(function(event) {
     event.preventDefault(); // prevents page reloading
@@ -308,6 +338,43 @@ $("#btn_home").click(function(event) {
     return false;
 });
 
+for(var i = 0, len = fav_locs.length; i < len; i++){
+    $("#btn_fav" + i).click(function () {
+        var id_cm = $(this).attr("id");
+        iota(id_cm);
+    })
+}
+
+function iota(id){
+    console.log(id)
+}
+
+// $("#btn_fav").click(function(event) {
+//     event.preventDefault(); // prevents page reloading
+//     console.log("btn_fav");
+//
+//     if( fav_locs.length === 0) {
+//         alert("You didn't add any favorite place.")
+//     } else {
+//         var uluru = fav_locs_add[0];
+//         var map = new google.maps.Map(
+//             document.getElementById('map'), {zoom: 13, center: uluru});
+//
+//         var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+//
+//         var markers = fav_locs_add.map(function(location, j) {
+//             return new google.maps.Marker({
+//                 position: location,
+//                 label: labels[j % labels.length]
+//             });
+//         });
+//
+//         var markerCluster = new MarkerClusterer(map, markers,
+//             {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+//
+//     }
+//     return false;
+// });
 
 $("#btn_work").click(function(event) {
     event.preventDefault(); // prevents page reloading
