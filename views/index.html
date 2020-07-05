@@ -72,8 +72,8 @@
             </a>
             <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                 <div class="bg-white py-2 collapse-inner rounded">
-                    <a class="collapse-item" href="#">Home</a>
-                    <a class="collapse-item" href="#">Workplace</a>
+                    <a class="collapse-item" href="#" id="btn_home">Home</a>
+                    <a class="collapse-item" href="#" id="btn_work">Workplace</a>
                 </div>
             </div>
         </li>
@@ -258,6 +258,42 @@ $("#btn_search").click(function(event) {
     socket.emit('search', $('#search_txt').val());
     return false;
 });
+
+var user_id;
+var email_ad;
+var home_loc;
+var work_loc;
+var fav_locs = [];
+var vis_locs = [];
+
+socket.on('user',(data)=>{
+    console.log(data);
+    user_id = data["_id"];
+    email_ad = data["email"];
+    home_loc = data["home"];
+    work_loc = data["work"];
+    fav_locs = data["fav_places"];
+    vis_locs = data["vis_places"];
+
+    // console.log(work_loc);
+    // console.log(fav_locs);
+    // console.log(vis_locs);
+});
+
+$("#btn_home").click(function(event) {
+    event.preventDefault(); // prevents page reloading
+    console.log("btn_home");
+    //socket.emit('search', $('#search_txt').val());
+    console.log(home_loc);
+    socket.emit('getPlaceByID',home_loc);
+    socket.on('getPlaceByIDRes',(data)=>{
+        console.log(data);
+    })
+
+    return false;
+});
+
+
 socket.on('searchRes',(data)=>{
     //console.log(data);
     if(data[0]["status"] === 'OK') {
