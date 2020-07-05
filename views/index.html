@@ -79,8 +79,8 @@
         </li>
 
         <li class="nav-item">
-            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities" aria-expanded="true" aria-controls="collapseUtilities">
-                <i class="fas fa-fw fa-wrench"></i>
+            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsefavorite" aria-expanded="true" aria-controls="collapseUtilities">
+                <i class="fas fa-fw fa-cog"></i>
                 <span>Favorite Places</span>
             </a>
             <div id="collapsefavorite" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
@@ -283,16 +283,47 @@ socket.on('user',(data)=>{
 $("#btn_home").click(function(event) {
     event.preventDefault(); // prevents page reloading
     console.log("btn_home");
-    //socket.emit('search', $('#search_txt').val());
-    console.log(home_loc);
-    socket.emit('getPlaceByID',home_loc);
-    socket.on('getPlaceByIDRes',(data)=>{
-        console.log(data);
-    })
+
+    if(home_loc){
+        console.log(home_loc);
+        socket.emit('getPlaceByID',home_loc);
+        socket.on('getPlaceByIDRes',(data)=>{
+            console.log(data);
+            var loc = data["geometry"];
+            var uluru = loc;
+            var map = new google.maps.Map(
+                document.getElementById('map'), {zoom: 15, center: uluru});
+            var marker = new google.maps.Marker({position: uluru, map: map});
+        });
+    } else {
+        alert("You should set your home address first.");
+    }
 
     return false;
 });
 
+
+$("#btn_work").click(function(event) {
+    event.preventDefault(); // prevents page reloading
+    console.log("btn_work");
+
+    if(work_loc){
+        console.log(work_loc);
+        socket.emit('getPlaceByID',work_loc);
+        socket.on('getPlaceByIDRes',(data)=>{
+            console.log(data);
+            var loc = data["geometry"];
+            var uluru = loc;
+            var map = new google.maps.Map(
+                document.getElementById('map'), {zoom: 15, center: uluru});
+            var marker = new google.maps.Marker({position: uluru, map: map});
+        });
+    } else {
+        alert("You should set your work address first.");
+    }
+
+    return false;
+});
 
 socket.on('searchRes',(data)=>{
     //console.log(data);
