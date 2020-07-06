@@ -24,8 +24,8 @@
 
 ```json
 {
-   "_id":"user_id",
-   "email":"user_email",
+   "_id":"_id",
+   "email":"user google email",
    "home":"place_id",
    "work":"place_id",
    "fav_places":
@@ -43,7 +43,8 @@
             "vis_place":"place_id",
             "vis_date":"date"
         }
-    ]
+    ],
+  "contact_email": "user email"
 }
 ```
 + Place
@@ -63,7 +64,7 @@
       }
     ],
     "status": "Google MAP API",
-    "tupes": ["Place Types"],
+    "types": ["Place Types"]
 }    
 ```
 Case

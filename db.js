@@ -30,7 +30,8 @@ const userSchema = new mongoose.Schema({
     vis_places:[{
         vis_place:{type:SchemaTypes.ObjectId, ref:'places'},
         vis_date:{type: Date, default: Date.now}
-    }]
+    }],
+    contact_email: String
 })
 
 const placeSchema = new mongoose.Schema({
@@ -58,9 +59,11 @@ const User = mongoose.model('users',userSchema);
 const Place = mongoose.model('places',placeSchema);
 const Case = mongoose.model('cases',caseSchema)
 
+mongoose.set('useFindAndModify', false);
+
 async function getUser(email){
     return new Promise(async (resolve,reject) => {
-        let user = new User({email:email});
+        let user = new User({email:email,contact_email:email});
         let userID = null;
         // find user
         await User.findOne({email:email},(err,docs)=>{
@@ -80,15 +83,10 @@ async function getUser(email){
     });
 }
 
-// async function getInfo(email){
-//     return new Promise(async (resolve,reject) => {
-//         await User.findOne({email:email}).populate('home','work').exec((err,data)=>{
-//             if(err) reject(err);
-//             console.log(data);
-//             resolve(data);
-//         })
-//     });
-// }
+async function setEmail(userID, email){
+    let doc = await User.findOneAndUpdate({_id:userID},{"contact_email":email});
+    console.log(doc["contact_email"]);
+}
 
 async function getPlaceByID(id){
     console.log("ID is: ",id);
@@ -377,3 +375,6 @@ exports.checkPlace = checkPlace;
 exports.getPlaceByID = getPlaceByID;
 exports.getUserByID = getUserByID;
 exports.getCaseByID = getCaseByID;
+
+//settings
+exports.setEmail = setEmail;

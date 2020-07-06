@@ -16,7 +16,6 @@
 <script src="../node_modules/socket.io-client/dist/socket.io.js"></script>
 <script>
 $(function () {
-
     var socket = io();
     $('.t1').submit(function(e) {
         e.preventDefault(); // prevents page reloading
@@ -29,16 +28,7 @@ $(function () {
     socket.on('user',(data)=>{
         console.log(data);
     });
-
-    socket.emit('getPlaceByID',"5ef02ab03894fab970fcfc84");
-    socket.on('getPlaceByIDRes',(data)=>{
-        console.log(data);
-    })
-    // $('.t2').submit(function(e) {
-    //     e.preventDefault(); // prevents page reloading
-    //     socket.emit('setHome',$('#m').val());
-    //     return false;
-    // });
+    socket.emit('setEmail',"mio@admin.cc");
 });
 </script>
 </body>
