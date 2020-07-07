@@ -16,12 +16,12 @@
     display: none;
 }
 
-.menu-item {
-    height: 20px;
-    background-color: white;
-}
+/*.menu-item {*/
+/*    height: 120px;*/
+/*    background-color: white;*/
+/*}*/
 
-.menu-item:hover {
-    background-color: #6CB5FF;
-    cursor: pointer;
-}
+/*.menu-item:hover {*/
+/*    background-color: #6CB5FF;*/
+/*    cursor: pointer;*/
+/*}*/
