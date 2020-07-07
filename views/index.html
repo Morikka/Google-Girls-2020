@@ -335,7 +335,7 @@ function add_vis(){
 }
 
 socket.on('getPlaceByIDRes2',(data)=>{
-    var name = data["mapName"];
+        var name = data["mapName"];
     var loc = data["geometry"];
     // console.log(name);
     // console.log(loc);
@@ -552,7 +552,6 @@ socket.on('searchRes',(data)=>{
         });
 
 
-
     } else {
         alert("No such place!");
     }
@@ -566,6 +565,8 @@ function placeMarkerAndPanTo(latLng, map) {
     map.panTo(latLng);
 }
 
+var temp_place = [];
+
 function attachSecretMessage(marker, secretMessage) {
     var infowindow = new google.maps.InfoWindow({
         content: secretMessage
@@ -578,10 +579,16 @@ function attachSecretMessage(marker, secretMessage) {
     });
     marker.addListener('rightclick', function(e) {
         console.log('Right click triggered');
-        console.log(marker);
-        // var latitude = event.latLng.lat();
-        // var longitude = event.latLng.lng();
+        // console.log(secretMessage);
+        var latitude = e.latLng.lat();
+        var longitude = e.latLng.lng();
+        // console.log(latitude);
+        // console.log(longitude);
+        temp_place = {"geometry": {"lat": latitude,"lng":longitude},
+                        "mapName":secretMessage,
+        }
 
+        // console.log(temp_place);
         // showContextMenu(event.latLng.lat());
         for (prop in e) {
             if (e[prop] instanceof MouseEvent) {
@@ -603,6 +610,23 @@ function attachSecretMessage(marker, secretMessage) {
 
     });
 }
+
+$("#set_home").click(function(event) {
+    event.preventDefault(); // prevents page reloading
+    console.log("set_home");
+    console.log(event);
+    var loc = temp_place["geometry"];
+    var uluru = loc;
+    var map = new google.maps.Map(
+        document.getElementById('map'), {zoom: 15, center: uluru});
+    var marker = new google.maps.Marker({position: uluru, map: map});
+
+
+    // TODO: send the temp_place to database
+
+    menuBox.style.display = "none";
+    return false;
+});
 
 
 function change_location(){
