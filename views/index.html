@@ -217,6 +217,15 @@
 <!--             Begin Page Content -->
             <div class="container-fluid" id="map-container">
                 <div id="map"></div>
+                <div class="menu" id="menu">
+                    <div class="menu-item">
+                        <i class="glyphicon glyphicon-file"></i>
+                        <span>Set Home <A></A>ddress</span>
+                        <span>Set Work Address</span>
+                        <span>Add to Favorite</span>
+                        <span>Add to One-time Visite</span>
+                    </div>
+                </div>
             </div>
 <!--             /.container-fluid -->
 
@@ -236,8 +245,34 @@
     <!-- End of Content Wrapper -->
 
 </div>
+<div class="contextMenu">
+    <ul>
+        <li id="zoomIn"><a href="#zoomIn">Zoom In</a></li>
+        <li id="zoomOut"><a href="#zoomOut">Zoom Out</a></li>
+        <li class="separator"><div></div></li>
+        <li id="centerHere"><a href="#centerHere">Center Here</a></li>
+    </ul>
+</div>
 <!-- End of Page Wrapper -->
+<style type="text/css">
+    #map_canvas{
+        width: 400px;
+        height: 300px;
+    }
+    .contextmenu{
+        visibility:hidden;
+        background:#ffffff;
+        border:1px solid #8888FF;
+        z-index: 10;
+        position: relative;
+        width: 140px;
+    }
+    .contextmenu div{
+        padding-left: 5px
+    }
+</style>
 
+<div class="formDiv" id="map_canvas"></div>
 <!-- Scroll to Top Button-->
 <a class="scroll-to-top rounded" href="#page-top">
     <i class="fas fa-angle-up"></i>
@@ -290,7 +325,7 @@ socket.on('user',(data)=>{
 function add_vis(){
     for(var i = 0, len = vis_locs.length; i < len; i++){
         // console.log("test");
-        console.log("add vis");
+        // console.log("add vis");
         vis_time.push(vis_locs[i]["vis_date"]);
         // console.log(vis_locs[i]["vis_date"])
         socket.emit('getPlaceByID2',vis_locs[i]["vis_place"]);
@@ -302,15 +337,15 @@ function add_vis(){
 socket.on('getPlaceByIDRes2',(data)=>{
     var name = data["mapName"];
     var loc = data["geometry"];
-    console.log(name);
-    console.log(loc);
+    // console.log(name);
+    // console.log(loc);
     vis_locs_add.push(loc);
     var i  = vis_list.length;
     var time = vis_time[i].slice(0, 10);
 
     var temp = "<a class=\"collapse-item\" href=\"#\"" + "id=\"btn_vis" + i +"\"" + ">" + name + "<br>" + time + "</a>";
     vis_list.push(temp);
-    console.log(temp);
+    // console.log(temp);
 
     $("#uservis").append(temp);
 
@@ -461,12 +496,16 @@ socket.on('searchRes',(data)=>{
     //console.log(data);
     if(data[0]["status"] === 'OK') {
         var locations = [];
+        var mapNames = [];
         var uluru = data[0]["geometry"];
-        //console.log(uluru);
+        // console.log(uluru);
         for(var i = 0, len = data.length; i < len; i++){
-            var loc = data[i]["geometry"];
-            //console.log(loc);
-            locations.push(loc);
+            if(data[i]["status"] === 'OK') {
+                var loc = data[i]["geometry"];
+                // console.log(data[i]);
+                locations.push(loc);
+                mapNames.push(data[i]["mapName"]);
+            }
         }
         var map = new google.maps.Map(
             document.getElementById('map'), {zoom: 15, center: uluru});
@@ -474,18 +513,97 @@ socket.on('searchRes',(data)=>{
         var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
         var markers = locations.map(function(location, j) {
-            return new google.maps.Marker({
+            var marker = new google.maps.Marker({
                 position: location,
                 label: labels[j % labels.length]
             });
+            attachSecretMessage(marker, mapNames[j]);
+            return marker;
         });
 
         var markerCluster = new MarkerClusterer(map, markers,
             {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+
+
+        var menuDisplayed = false;
+        var menuBox = null;
+
+        window.addEventListener("contextmenu", function() {
+            var left = arguments[0].clientX;
+            var top = arguments[0].clientY;
+
+            menuBox = document.getElementById("menu");
+            menuBox.style.left = left + "px";
+            menuBox.style.top = top + "px";
+            menuBox.style.display = "block";
+
+            arguments[0].preventDefault();
+
+            menuDisplayed = true;
+        }, false);
+
+
+        google.maps.event.addListener(map, "click", function(event) {
+            console.log('click on map.');
+            placeMarkerAndPanTo(event.latLng, map);
+            if (menuDisplayed == true) {
+                menuBox.style.display = "none";
+            }
+        });
+
+
+
     } else {
         alert("No such place!");
     }
 });
+
+function placeMarkerAndPanTo(latLng, map) {
+    var marker = new google.maps.Marker({
+        position: latLng,
+        map: map
+    });
+    map.panTo(latLng);
+}
+
+function attachSecretMessage(marker, secretMessage) {
+    var infowindow = new google.maps.InfoWindow({
+        content: secretMessage
+    });
+
+    marker.addListener("click", function(event) {
+        console.log("click marker");
+        infowindow.open(marker.get("map"), marker);
+
+    });
+    marker.addListener('rightclick', function(e) {
+        console.log('Right click triggered');
+        console.log(marker);
+        // var latitude = event.latLng.lat();
+        // var longitude = event.latLng.lng();
+
+        // showContextMenu(event.latLng.lat());
+        for (prop in e) {
+            if (e[prop] instanceof MouseEvent) {
+                mouseEvt = e[prop];
+                var left = mouseEvt.clientX;
+                var top = mouseEvt.clientY;
+
+                menuBox = document.getElementById("menu");
+                menuBox.style.left = left + "px";
+                menuBox.style.top = top + "px";
+                menuBox.style.display = "block";
+
+                mouseEvt.preventDefault();
+
+                menuDisplayed = true;
+            }
+        }
+
+
+    });
+}
+
 
 function change_location(){
     var uluru = {lat: -25.344, lng: 131.036};
@@ -493,7 +611,6 @@ function change_location(){
         document.getElementById('map'), {zoom: 4, center: uluru});
     var marker = new google.maps.Marker({position: uluru, map: map});
 }
-
 
 </script>
 
