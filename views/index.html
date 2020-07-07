@@ -311,7 +311,7 @@ socket.on('user',(data)=>{
     console.log(data);
     user_id = data["_id"];
     email_ad = data["email"];
-    home_loc = data["home"];
+                home_loc = data["home"];
     work_loc = data["work"];
     fav_locs = data["fav_places"];
     vis_locs = data["vis_places"];
@@ -441,36 +441,10 @@ $("#btn_email").click(function(event) {
         email_ad = window.prompt("Input your email address here:","abc@cityu.edu.hk");
         console.log(email_ad);
     }
-    socket.emit('setEmail', email_ad);
+            socket.emit('setEmail', email_ad);
     return false;
 });
 
-// $("#btn_fav").click(function(event) {
-//     event.preventDefault(); // prevents page reloading
-//     console.log("btn_fav");
-//
-//     if( fav_locs.length === 0) {
-//         alert("You didn't add any favorite place.")
-//     } else {
-//         var uluru = fav_locs_add[0];
-//         var map = new google.maps.Map(
-//             document.getElementById('map'), {zoom: 13, center: uluru});
-//
-//         var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-//
-//         var markers = fav_locs_add.map(function(location, j) {
-//             return new google.maps.Marker({
-//                 position: location,
-//                 label: labels[j % labels.length]
-//             });
-//         });
-//
-//         var markerCluster = new MarkerClusterer(map, markers,
-//             {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
-//
-//     }
-//     return false;
-// });
 
 $("#btn_work").click(function(event) {
     event.preventDefault(); // prevents page reloading
@@ -497,6 +471,7 @@ socket.on('searchRes',(data)=>{
     if(data[0]["status"] === 'OK') {
         var locations = [];
         var mapNames = [];
+        var loc_ids = [];
         var uluru = data[0]["geometry"];
         // console.log(uluru);
         for(var i = 0, len = data.length; i < len; i++){
@@ -505,6 +480,8 @@ socket.on('searchRes',(data)=>{
                 // console.log(data[i]);
                 locations.push(loc);
                 mapNames.push(data[i]["mapName"]);
+                loc_ids.push(data[i]["_id"]);
+                // console.log(data[i]["_id"]);
             }
         }
         var map = new google.maps.Map(
@@ -517,7 +494,7 @@ socket.on('searchRes',(data)=>{
                 position: location,
                 label: labels[j % labels.length]
             });
-            attachSecretMessage(marker, mapNames[j]);
+            attachSecretMessage(marker, mapNames[j], loc_ids[j]);
             return marker;
         });
 
@@ -567,7 +544,7 @@ function placeMarkerAndPanTo(latLng, map) {
 
 var temp_place = [];
 
-function attachSecretMessage(marker, secretMessage) {
+function attachSecretMessage(marker, secretMessage, id) {
     var infowindow = new google.maps.InfoWindow({
         content: secretMessage
     });
@@ -586,6 +563,7 @@ function attachSecretMessage(marker, secretMessage) {
         // console.log(longitude);
         temp_place = {"geometry": {"lat": latitude,"lng":longitude},
                         "mapName":secretMessage,
+                        "_id": id,
         }
 
         // console.log(temp_place);
@@ -614,8 +592,9 @@ function attachSecretMessage(marker, secretMessage) {
 $("#set_home").click(function(event) {
     event.preventDefault(); // prevents page reloading
     console.log("set_home");
-    console.log(event);
+    // console.log(event);
     var loc = temp_place["geometry"];
+    home_loc = temp_place["_id"];
     var uluru = loc;
     var map = new google.maps.Map(
         document.getElementById('map'), {zoom: 15, center: uluru});
@@ -623,6 +602,13 @@ $("#set_home").click(function(event) {
 
 
     // TODO: send the temp_place to database
+    var temp_msg = {
+        "id": home_loc,
+        "type": 1,
+    };
+    socket.emit('setPlace', temp_msg);
+
+
 
     menuBox.style.display = "none";
     return false;
