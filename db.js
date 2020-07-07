@@ -30,7 +30,8 @@ const userSchema = new mongoose.Schema({
     vis_places:[{
         vis_place:{type:SchemaTypes.ObjectId, ref:'places'},
         vis_date:{type: Date, default: Date.now}
-    }]
+    }],
+    contact_email: String
 })
 
 const placeSchema = new mongoose.Schema({
@@ -58,9 +59,11 @@ const User = mongoose.model('users',userSchema);
 const Place = mongoose.model('places',placeSchema);
 const Case = mongoose.model('cases',caseSchema)
 
+mongoose.set('useFindAndModify', false);
+
 async function getUser(email){
     return new Promise(async (resolve,reject) => {
-        let user = new User({email:email});
+        let user = new User({email:email,contact_email:email});
         let userID = null;
         // find user
         await User.findOne({email:email},(err,docs)=>{
@@ -80,15 +83,10 @@ async function getUser(email){
     });
 }
 
-// async function getInfo(email){
-//     return new Promise(async (resolve,reject) => {
-//         await User.findOne({email:email}).populate('home','work').exec((err,data)=>{
-//             if(err) reject(err);
-//             console.log(data);
-//             resolve(data);
-//         })
-//     });
-// }
+async function setEmail(userID, email){
+    let doc = await User.findOneAndUpdate({_id:userID},{"contact_email":email});
+    console.log(doc["contact_email"]);
+}
 
 async function getPlaceByID(id){
     console.log("ID is: ",id);
@@ -99,6 +97,26 @@ async function getPlaceByID(id){
         });
     });
 }
+
+async function getUserByID(id){
+    return new Promise(async (resolve,reject) => {
+        await User.findOne({_id: id}, (err, data) => {
+            if (err) reject(err);
+            resolve(data);
+        });
+    });
+}
+
+async function getCaseByID(id){
+    return new Promise(async (resolve,reject) => {
+        await Case.findOne({_id: id}, (err, data) => {
+            if (err) reject(err);
+            resolve(data);
+        });
+    });
+}
+
+
 async function searchPlace(input){
     var query = {
         key:"AIzaSyCfEfBinkiInzbXiapMhgpsXpN03Q3dSGc",
@@ -219,7 +237,6 @@ async function findPlace(input){
             });
         } else {
             resolve(place);
-            console.log("???",place);
         }
     });
 };
@@ -300,17 +317,46 @@ async function setPlace(userID,placeID,type,date=null){
     });
 }
 
-// update place from cases;
-async function updatePlace(){
 
+async function addCase(new_case){
+    let flag = false;
+    // for (var item in new_case["place_and_date"]){
+    var place_name = new_case["place_and_date"][0]["place"];
+    console.log(">>>",place_name);
+    await findPlace(place_name).then(place =>{
+        console.log(place);
+        if(place[0]["_id"]!==undefined){
+            new_case["place_and_date"][0]["place"] = place[0]["_id"];
+        } else {
+            console.log("The place doesn't exist: ",place_name);
+            flag = true;
+        }
+        if(!flag){
+            // UNFINISHED
+            Case.findOne({"case_id":new_case["case_id"]},async (err,docs)=>{
+                if(docs===null || docs.length===0){
+                    let newcase = new Case(new_case);
+                    newcase.save(err=>{
+                        console.log(err);
+                    });
+                }else{
+                    const res = await Case.updateOne({"case_id":new_case["case_id"]},{$addToSet:{place_and_date:new_case["place_and_date"][0]}});
+                    console.log(res.n,res.nModified);
+                }
+            });
+        };
+    });
+
+    // new_case.save((err)=>{
+    //     if (err) console.log(error);
+    // });
 }
 
-function checkPlace(){
-
-}
-
-async function addCase(){
-
+async function checkPlace(){
+    for await (const user of User.find()) {
+        let email = user["email"];
+        console.log(email);
+    }
 }
 
 exports.getUser = getUser;
@@ -318,12 +364,17 @@ exports.getUser = getUser;
 
 exports.setPlace = setPlace;
 exports.findPlace = findPlace;
-exports.updatePlace = updatePlace;
-exports.checkPlace = checkPlace;
+// exports.updatePlace = updatePlace;
 
 // private
 exports.textSearch = textSearch;
 exports.addCase = addCase;
+exports.checkPlace = checkPlace;
 
 //getByID
 exports.getPlaceByID = getPlaceByID;
+exports.getUserByID = getUserByID;
+exports.getCaseByID = getCaseByID;
+
+//settings
+exports.setEmail = setEmail;

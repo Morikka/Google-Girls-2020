@@ -22,9 +22,11 @@ app.set('view engine', 'html');
 app.set('views', __dirname+'/views');
 app.set("view options", {layout: false});
 app.use('/', express.static(__dirname));
+
 var userID = "None";
 var email = "None";
 var user = "None";
+
 //Check user firstly
 app.get('/', async (req, res) => {
     const assertion = req.header('X-Goog-IAP-JWT-Assertion');
@@ -74,13 +76,21 @@ io.on('connection', (socket) => {
     //get user Info
     socket.emit('user',user);
 
+    //set user email
+    socket.on("setEmail",(msg) => {
+        console.log(msg);
+        db.setEmail(userID,msg);
+    })
+
+    //find place by ID
     socket.on("getPlaceByID",async (msg) => {
         place = await db.getPlaceByID(msg);
         console.log("Place is", place);
         socket.emit('getPlaceByIDRes', place);
     })
 
-    socket.on('set',(msg) =>{
+    //set place
+    socket.on('setPlace',(msg) =>{
         console.log("Set Home: ",place);
         db.setPlace(userID,place,1);
     });
