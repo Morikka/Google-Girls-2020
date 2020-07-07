@@ -99,7 +99,7 @@ io.on('connection', (socket) => {
     //set place
     socket.on('setPlace',(msg) =>{
         console.log("Set Home: ",place);
-        db.setPlace(userID,place,1);
+        db.setPlace(userID,msg["id"],msg["type"],msg["date"]);
     });
 });
 
