@@ -116,7 +116,7 @@
 
         <!-- Nav Item - Pages Collapse Menu -->
         <li class="nav-item">
-            <a class="nav-link collapsed" href="#" >
+            <a class="nav-link collapsed" href="#" id="btn_email">
                 <i class="fas fa-inbox"></i>
                 <span>Email</span>
             </a>
@@ -350,7 +350,22 @@ $("#btn_home").click(function(event) {
     return false;
 });
 
+$("#btn_email").click(function(event) {
+    event.preventDefault(); // prevents page reloading
+    console.log("btn_email");
 
+    if(email_ad){
+        console.log(email_ad);
+        email_ad = window.prompt("Input your email address here:", email_ad);
+        console.log(email_ad);
+
+    } else {
+        email_ad = window.prompt("Input your email address here:","abc@cityu.edu.hk");
+        console.log(email_ad);
+    }
+    socket.emit('setEmail', email_ad);
+    return false;
+});
 
 // $("#btn_fav").click(function(event) {
 //     event.preventDefault(); // prevents page reloading
