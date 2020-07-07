@@ -73,6 +73,15 @@ io.on('connection', (socket) => {
         socket.emit('searchRes', place);
     });
 
+    // search the place
+    socket.on('search2', async (msg) => {
+        console.log('user ID: ' + userID);
+        console.log('search: ' + msg);
+        place = await db.findPlace(msg);
+        console.log("Place is", place);
+        socket.emit('searchRes2', place);
+    });
+
     //get user Info
     socket.emit('user',user);
 
