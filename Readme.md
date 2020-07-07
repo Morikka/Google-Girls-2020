@@ -177,3 +177,5 @@ Nearby Search and Text Search return all of the available data fields for the se
 Nearby Search or Text Search to only return specific fields.
 
 Place Types: https://developers.google.com/places/web-service/supported_types
+
+Data is

@@ -28,7 +28,7 @@ async function test1(){
         console.log(userID);
     }
 }
-test1();
+// test1();
 
 async function test2(){
     let email = "test@t.t"
@@ -52,10 +52,10 @@ function test3(){
 
 // test3();
 
-async function test4(){
-    await db.checkPlace();
-}
-
+// async function test4(){
+//     await db.checkPlace();
+// }
+//
 // test4();
 
 // async function test5(){

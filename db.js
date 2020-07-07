@@ -311,12 +311,13 @@ async function findPlaceType(type){
 async function addCase(new_case){
     let flag = false;
     // for (var item in new_case["place_and_date"]){
-    var place_name = new_case["place_and_date"][0]["place"];
+    var place_name = new_case["place"];
     console.log(">>>",place_name);
     await findPlace(place_name).then(place =>{
         console.log(place);
+        console.log(place.length);
         if(place[0]["_id"]!==undefined){
-            new_case["place_and_date"][0]["place"] = place[0]["_id"];
+            new_case["place"] = place["_id"];
         } else {
             console.log("The place doesn't exist: ",place_name);
             flag = true;
