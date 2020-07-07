@@ -313,19 +313,31 @@ socket.on('getPlaceByIDRes',(data)=>{
     var i  = fav_list.length;
     var temp = "<a class=\"collapse-item\" href=\"#\"" + "id=\"btn_fav" + i +"\"" + ">" + name + "</a>";
     fav_list.push(temp);
-    console.log(temp);
+    // console.log(temp);
     $("#userfav").append(temp);
+    $("#btn_fav" + i).click(function(event) {
+        // var id_cm = $(this).attr("id");
+        // iota(id_cm);
+        event.preventDefault(); // prevents page reloading
+        // console.log("btn_fav" + i);
+        var loc = fav_locs_add[i];
+        var uluru = loc;
+        var map = new google.maps.Map(
+            document.getElementById('map'), {zoom: 15, center: uluru});
+        var marker = new google.maps.Marker({position: uluru, map: map});
+
+    })
 });
 
 $("#btn_home").click(function(event) {
     event.preventDefault(); // prevents page reloading
-    console.log("btn_home");
+    // console.log("btn_home");
 
     if(home_loc){
-        console.log(home_loc);
+        // console.log(home_loc);
         socket.emit('getPlaceByID',home_loc);
         socket.on('getPlaceByIDRes',(data)=>{
-            console.log(data);
+            // console.log(data);
             var loc = data["geometry"];
             var uluru = loc;
             var map = new google.maps.Map(
@@ -338,16 +350,7 @@ $("#btn_home").click(function(event) {
     return false;
 });
 
-for(var i = 0, len = fav_locs.length; i < len; i++){
-    $("#btn_fav" + i).click(function () {
-        var id_cm = $(this).attr("id");
-        iota(id_cm);
-    })
-}
 
-function iota(id){
-    console.log(id)
-}
 
 // $("#btn_fav").click(function(event) {
 //     event.preventDefault(); // prevents page reloading
