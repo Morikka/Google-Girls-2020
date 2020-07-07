@@ -97,14 +97,14 @@
                 <span>One-time Places</span>
             </a>
             <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
-                <div class="bg-white py-2 collapse-inner rounded">
-                    <div class="bg-white py-2 collapse-inner rounded",id="uservis">
-                    </div>
-<!--                    <a class="collapse-item" href="#">IKEA (Kowloon Bay)</a>-->
-<!--                    <a class="collapse-item" href="#">Science Park</a>-->
+                <div class="bg-white py-2 collapse-inner rounded", id="uservis">
+
+                    <!--                    <a class="collapse-item" href="#">IKEA (Kowloon Bay)</a>-->
+                    <!--                    <a class="collapse-item" href="#">Science Park</a>-->
                 </div>
             </div>
         </li>
+
 
         <!-- Divider -->
         <hr class="sidebar-divider">
@@ -270,6 +270,7 @@ var fav_locs_add = [];
 var vis_time = [];
 var vis_locs_add = [];
 var fav_list = [];
+var vis_list = [];
 
 socket.on('user',(data)=>{
     console.log(data);
@@ -279,32 +280,74 @@ socket.on('user',(data)=>{
     work_loc = data["work"];
     fav_locs = data["fav_places"];
     vis_locs = data["vis_places"];
-    add();
+    add_fav();
+    add_vis();
     // console.log(work_loc);
-    console.log(fav_locs);
-    // console.log(vis_locs);
+    // console.log(fav_locs);
+    console.log(vis_locs);
 });
 
-function add(){
+function add_vis(){
+    for(var i = 0, len = vis_locs.length; i < len; i++){
+        // console.log("test");
+        console.log("add vis");
+        vis_time.push(vis_locs[i]["vis_date"]);
+        // console.log(vis_locs[i]["vis_date"])
+        socket.emit('getPlaceByID2',vis_locs[i]["vis_place"]);
+    }
+    // $("#uservis").append("<a class=\"collapse-item\" href=\"#\">TestTestTestTestTestTest<br>TestTestTestTestTestTestTestTestv</a>");
+
+}
+
+socket.on('getPlaceByIDRes2',(data)=>{
+    var name = data["mapName"];
+    var loc = data["geometry"];
+    console.log(name);
+    console.log(loc);
+    vis_locs_add.push(loc);
+    var i  = vis_list.length;
+    var time = vis_time[i].slice(0, 10);
+
+    var temp = "<a class=\"collapse-item\" href=\"#\"" + "id=\"btn_vis" + i +"\"" + ">" + name + "<br>" + time + "</a>";
+    vis_list.push(temp);
+    console.log(temp);
+
+    $("#uservis").append(temp);
+
+    $("#btn_vis" + i).click(function(event) {
+        // var id_cm = $(this).attr("id");
+        // iota(id_cm);
+        event.preventDefault(); // prevents page reloading
+        // console.log("btn_fav" + i);
+        var loc = vis_locs_add[i];
+        var uluru = loc;
+        var map = new google.maps.Map(
+            document.getElementById('map'), {zoom: 15, center: uluru});
+        var marker = new google.maps.Marker({position: uluru, map: map});
+
+    })
+});
+
+
+function add_fav(){
     //<a class="collapse-item" href="#">IKEA (Kowloon Bay)</a>
     //$("#userfav").append("<a class=\"collapse-item\" href=\"#\">Test</a>");
-    if( fav_locs.length === 0) {
-        alert("You didn't add any favorite place.")
-    } else {
-        for(var i = 0, len = fav_locs.length; i < len; i++){
-            console.log("test");
-            console.log(i);
-            socket.emit('getPlaceByID',fav_locs[i]["fav_place"]);
-            var name;
-            var loc;
 
+    // if( fav_locs.length === 0) {
+    //     alert("You didn't add any favorite place.")
+    // } else {
+        for(var i = 0, len = fav_locs.length; i < len; i++){
+            // console.log("test");
+            // console.log(i);
+            socket.emit('getPlaceByID',fav_locs[i]["fav_place"]);
         }
-    }
+    // }
 
     // $("#uservis").append("a");
 }
+
 socket.on('getPlaceByIDRes',(data)=>{
-    console.log(data);
+    //console.log(data);
     var name = data["mapName"];
     var loc = data["geometry"];
     // console.log(name);
