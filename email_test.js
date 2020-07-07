@@ -28,3 +28,4 @@ var json = {
     vis_places: {
         '0': { mapName: '香港大學', flag: false, cases: [] }}
 }
+module.exports.json = json;
