@@ -11,6 +11,8 @@ const qs = require('qs');
 
 const dbName = 'test';
 const url = "mongodb+srv://mio:Jcu3gbEBnzhd3BHL@ggirls-rw5nh.gcp.mongodb.net/"+dbName+"?retryWrites=true&w=majority";
+const email = require('./email');
+
 
 mongoose.connect(url, {useNewUrlParser: true, useUnifiedTopology: true});
 const db = mongoose.connection;
@@ -26,7 +28,6 @@ const userSchema = new mongoose.Schema({
     home: {type:SchemaTypes.ObjectId, ref:'places'},
     work: {type:SchemaTypes.ObjectId, ref:'places'},
     fav_places : [{fav_place:{type:SchemaTypes.ObjectId, ref:'places'}}],
-    // fav_places : [{type:SchemaTypes.ObjectId, ref:'Place'}],
     vis_places:[{
         vis_place:{type:SchemaTypes.ObjectId, ref:'places'},
         vis_date:{type: Date, default: Date.now}
@@ -42,7 +43,7 @@ const placeSchema = new mongoose.Schema({
         lat: SchemaTypes.Double,
         lng: SchemaTypes.Double
     },
-    flag:Boolean,
+    flag: {type:Boolean, default:false},
     cases: [{case:{type:SchemaTypes.ObjectId, ref:'cases'}}],
     types: [{ type: String }]
 })
@@ -203,25 +204,6 @@ function textSearch(input){
     });
 }
 
-// async function findPlace(input){
-//     return new Promise(async (resolve,reject) => {
-//         var place = 'None';
-//         await Place.find({mapName:input}, (err,docs) =>{
-//             if(err) reject(err);
-//             console.log("Find place in database");
-//             place = docs;
-//
-//         }).then(async ()=>{
-//             if (place.length===0) {
-//                 searchPlace(input).then(x=>savePlace(x)).then(x=>{
-//                     console.log("Find place in API");
-//                     resolve([x]);
-//                 });
-//             } else resolve(place);
-//         });
-//     });
-// };
-
 async function findPlace(input){
     return new Promise(async (resolve,reject) => {
         var place = 'None';
@@ -317,6 +299,14 @@ async function setPlace(userID,placeID,type,date=null){
     });
 }
 
+async function findPlaceType(type){
+    return new Promise(async (resolve,reject) =>{
+        await Place.find({types:type},(err,docs)=>{
+            if(err) reject(err);
+            resolve(docs);
+        });
+    });
+}
 
 async function addCase(new_case){
     let flag = false;
@@ -332,7 +322,6 @@ async function addCase(new_case){
             flag = true;
         }
         if(!flag){
-            // UNFINISHED
             Case.findOne({"case_id":new_case["case_id"]},async (err,docs)=>{
                 if(docs===null || docs.length===0){
                     let newcase = new Case(new_case);
@@ -346,16 +335,77 @@ async function addCase(new_case){
             });
         };
     });
+}
 
-    // new_case.save((err)=>{
-    //     if (err) console.log(error);
-    // });
+async function findCaseByGeo(geo){
+    let lat = geo["lat"];
+    let lng = geo["lng"];
+    let new_lat = 500 * 0.0000089;
+    let new_lng = new_lat / Math.cos(lat * 0.018);
+    console.log(new_lat,new_lng);
+    return new Promise(async (resolve,reject) => {
+        Place.find({
+            // "flag":"False",
+            "geometry.lat":{$lt:lat+new_lat,$gt:lat-new_lat},
+            "geometry.lng":{$lt:lng+new_lng,$gt:lat-new_lng}
+        },(err,docs)=>{
+            console.log(docs);
+            let cases = [];
+            for(const place in docs){
+                console.log(place);
+                console.log(docs[place]);
+                cases[place] = {}
+                cases[place]["mapName"] = docs[place]["mapName"];
+                cases[place]["cases"] = docs[place]["cases"];
+            }
+            console.log(cases);
+            resolve(cases);
+        });
+    });
 }
 
 async function checkPlace(){
     for await (const user of User.find()) {
-        let email = user["email"];
-        console.log(email);
+        let email_res = {};
+        console.log(email_res);
+        const email = user["contact_email"];
+
+        // Check Home
+        const home = await getPlaceByID(user["home"]);
+        email_res["home"] = home["mapName"];
+        email_res["home_case"] = await findCaseByGeo(home["geometry"]);
+
+        //Check Work
+        const work = await getPlaceByID(user["work"]);
+        email_res["work"] = work["mapName"];
+        email_res["work_case"] = await findCaseByGeo(work["geometry"]);
+
+        //Check email
+        email_res["fav_places"] = {}
+        // user["fav_places"].forEach((item)=>{
+        //    console.log(item);
+        //     const fav = await getPlaceByID(item["fav_place"]);
+        // });
+        for (const place in user["fav_places"]){
+           const fav = await getPlaceByID(user["fav_places"][place]["fav_place"]);
+            email_res["fav_places"][place] = {};
+            email_res["fav_places"][place]["mapName"] = fav["mapName"];
+            email_res["fav_places"][place]["flag"] = fav["flag"];
+            email_res["fav_places"][place]["cases"] = fav["cases"];
+        }
+        for (const place in user["vis_places"]){
+            console.log(place);
+            const fav = await getPlaceByID(user["vis_places"][place]["vis_place"]);
+            console.log(fav);
+            const p = fav["cases"];
+            const d = user["vis_places"][place]["vis_date"];
+            console.log(p,d);
+            // email_res["vis_places"][place] = {};
+            // email_res["vis_places"][place]["mapName"] = fav["mapName"];
+            // email_res["vis_places"][place]["flag"] = fav["flag"];
+            // email_res["vis_places"][place]["cases"] = fav["cases"];
+        }
+        console.log(email_res);
     }
 }
 
@@ -364,6 +414,7 @@ exports.getUser = getUser;
 
 exports.setPlace = setPlace;
 exports.findPlace = findPlace;
+exports.findPlaceType = findPlaceType;
 // exports.updatePlace = updatePlace;
 
 // private
