@@ -368,20 +368,11 @@
 
 
     function add_fav(){
-        //<a class="collapse-item" href="#">IKEA (Kowloon Bay)</a>
-        //$("#userfav").append("<a class=\"collapse-item\" href=\"#\">Test</a>");
-
-        // if( fav_locs.length === 0) {
-        //     alert("You didn't add any favorite place.")
-        // } else {
         for(var i = 0, len = fav_locs.length; i < len; i++){
             // console.log("test");
             // console.log(i);
             socket.emit('getPlaceByID',fav_locs[i]["fav_place"]);
         }
-        // }
-
-        // $("#uservis").append("a");
     }
 
     socket.on('getPlaceByIDRes',(data)=>{
@@ -408,9 +399,7 @@
             var marker = new google.maps.Marker({position: uluru, map: map});
             attachSecretMessage(marker, name, data["_id"]);
 
-            {
-                menuBox.style.display = "none";
-            }
+            menuBox.style.display = "none";
 
         })
     });
@@ -572,6 +561,11 @@
         marker.addListener("click", function(event) {
             console.log("click marker");
             infowindow.open(marker.get("map"), marker);
+            var temp = {
+                "_id": id,
+                "type": 1,
+            }
+            socket.emit('searchNearby', temp);
 
         });
         marker.addListener('rightclick', function(e) {
@@ -609,6 +603,90 @@
 
         });
     }
+
+    socket.on('searchNearbyRes',(data)=>{
+        console.log(data);
+        if(data[0]["status"] === 'OK') {
+            var locations = [];
+            var mapNames = [];
+            var loc_ids = [];
+            var uluru = data[0]["geometry"];
+            // console.log(uluru);
+            for(var i = 0, len = data.length; i < len; i++){
+                if(data[i]["status"] === 'OK') {
+                    var loc = data[i]["geometry"];
+                    // console.log(data[i]);
+                    locations.push(loc);
+                    mapNames.push(data[i]["mapName"]);
+                    loc_ids.push(data[i]["_id"]);
+                    // console.log(data[i]["_id"]);
+                }
+            }
+            var map = new google.maps.Map(
+                document.getElementById('map'), {zoom: 15, center: uluru});
+
+            // var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            var iconBase =
+                'https://developers.google.com/maps/documentation/javascript/examples/full/images/';
+
+            var icons = {
+                parking: {
+                    icon: iconBase + 'parking_lot_maps.png'
+                },
+                library: {
+                    icon: iconBase + 'library_maps.png'
+                },
+                info: {
+                    icon: iconBase + 'info-i_maps.png'
+                }
+            };
+
+            var markers = locations.map(function(location, j) {
+                var marker = new google.maps.Marker({
+                    position: location,
+                    icon: icons['info'],
+                    // label: labels[j % labels.length]
+                });
+                attachSecretMessage(marker, mapNames[j], loc_ids[j]);
+                return marker;
+            });
+
+            var markerCluster = new MarkerClusterer(map, markers,
+                {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+
+
+            var menuDisplayed = false;
+            var menuBox = null;
+
+            window.addEventListener("contextmenu", function() {
+                var left = arguments[0].clientX;
+                var top = arguments[0].clientY;
+
+                menuBox = document.getElementById("menu");
+                menuBox.style.left = left + "px";
+                menuBox.style.top = top + "px";
+                menuBox.style.display = "block";
+
+                arguments[0].preventDefault();
+
+                menuDisplayed = true;
+            }, false);
+
+
+            google.maps.event.addListener(map, "click", function(event) {
+                console.log('click on map.');
+                placeMarkerAndPanTo(event.latLng, map);
+                if (menuDisplayed == true) {
+                    menuBox.style.display = "none";
+                }
+            });
+
+
+        } else {
+            alert("No cases in the last 7 days.");
+        }
+    });
+
 
     $("#set_home").click(function(event) {
         event.preventDefault(); // prevents page reloading
