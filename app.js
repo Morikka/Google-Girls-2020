@@ -68,18 +68,31 @@ io.on('connection', (socket) => {
     socket.on('search', async (msg) => {
         console.log('user ID: ' + userID);
         console.log('search: ' + msg);
-        place = await db.findPlace(msg);
-        console.log("Place is", place);
-        socket.emit('searchRes', place);
+        await db.findPlace(msg).then(async place=>{
+            if(place[0]==='null'){
+                await db.findPlace(msg).then(place=>{
+                    socket.emit('searchRes', place);
+                });
+            }else{
+                socket.emit('searchRes', place);
+            };
+        })
+        // console.log("Place is", place);
+        // socket.emit('searchRes', place);
     });
 
     //get user Info
     socket.emit('user',user);
 
     //set user email
-    socket.on("setEmail",(msg) => {
+    socket.on("setEmail",async (msg) => {
         console.log(msg);
-        db.setEmail(userID,msg);
+        await db.setEmail(userID,msg).then(async x=>{
+            if(x != msg) {
+                    await db.setEmail(userID, msg);
+                }
+            }
+        );
     })
 
     //find place by ID
@@ -98,8 +111,10 @@ io.on('connection', (socket) => {
 
     //set place
     socket.on('setPlace',(msg) =>{
-        console.log("Set Home: ",place);
-        db.setPlace(userID,msg["id"],msg["type"],msg["date"]);
+        console.log(msg);
+        db.setPlace(userID,msg["id"],msg["type"],msg["date"]).then(x=>{
+            socket.emit("setPlaceRes",x);
+        })
     });
 });
 

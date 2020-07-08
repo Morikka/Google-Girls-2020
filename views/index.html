@@ -441,7 +441,7 @@ $("#btn_email").click(function(event) {
         email_ad = window.prompt("Input your email address here:","abc@cityu.edu.hk");
         console.log(email_ad);
     }
-            socket.emit('setEmail', email_ad);
+    socket.emit('setEmail', email_ad);
     return false;
 });
 

@@ -8,8 +8,8 @@ const qs = require('qs');
 // The database part
 // const dbName = 'ggirls';
 // use test database first
-
 const dbName = 'test';
+
 const url = "mongodb+srv://mio:Jcu3gbEBnzhd3BHL@ggirls-rw5nh.gcp.mongodb.net/"+dbName+"?retryWrites=true&w=majority";
 const email = require('./email');
 
@@ -85,12 +85,13 @@ async function getUser(email){
 }
 
 async function setEmail(userID, email){
-    let doc = await User.findOneAndUpdate({_id:userID},{"contact_email":email});
-    console.log(doc["contact_email"]);
+    return new Promise(async (resolve,reject) => {
+        let doc =  await User.findOneAndUpdate({_id:userID},{"contact_email":email});
+        resolve(doc["contact_email"]);
+    });
 }
 
 async function getPlaceByID(id){
-    console.log("ID is: ",id);
     return new Promise(async (resolve,reject) => {
         await Place.findOne({_id: id}, (err, data) => {
             if (err) reject(err);
@@ -116,7 +117,6 @@ async function getCaseByID(id){
         });
     });
 }
-
 
 async function searchPlace(input){
     var query = {
@@ -145,7 +145,6 @@ async function searchPlace(input){
                 body = Buffer.concat(bodyChunks);
                 var tmp = body.toString('utf8');
                 var tmp = JSON.parse(tmp);
-                console.log(tmp);
                 if(tmp['status']==='ZERO_RESULTS'){
                     json["status"] = 'ZERO_RESULTS';
                 }else{
@@ -211,33 +210,39 @@ async function findPlace(input){
             if(err) reject(err);
             console.log("Find place in database");
             place = docs;
-        })
-        if (place.length===0) {
-            searchPlace(input).then(x=>savePlace(x)).then(x=>{
-                console.log("Find place in API");
-                resolve([x]);
+        }).then(()=>{
+            if (place.length===0) {
+                searchPlace(input)
+                    .then(x=>savePlace(x))
+                    .then(x=>{
+                    console.log("Find place in API");
+                    resolve([x]);
+                    })
+                    .catch(e=>{
+                        console.log("Err: ",e);
+                        reject(e);
+                });
+                } else {
+                    resolve(place);
+                }
             });
-        } else {
-            resolve(place);
-        }
     });
 };
 
 async function savePlace(place){
     return new Promise(async (resolve,reject) =>{
-    let place_res = null;
-    await Place.findOne({mapID: place["mapID"]},(err,docs)=>{
-        if(err) return reject(err);
-        // place doesn't exist
-        if(docs===null || docs.length===0){
-            place_res = new Place(place);
-            place_res.save(err=>{
-                if (err) reject(err);
-            });
-        } else {
-            place_res = docs;
-        }
-    }).then(()=>{
+        let place_res = null;
+        await Place.findOne({mapID: place["mapID"]},(err,docs)=>{
+            if(err) reject(err);
+            if(docs===null || docs.length===0){
+                place_res = new Place(place);
+                place_res.save(err=>{
+                    if (err) reject(err);
+                });
+            } else {
+                place_res = docs;
+            }
+        }).then(()=>{
             resolve(place_res);
         });
     });
@@ -309,32 +314,53 @@ async function findPlaceType(type){
 }
 
 async function addCase(new_case){
-    let flag = false;
-    // for (var item in new_case["place_and_date"]){
-    var place_name = new_case["place"];
-    console.log(">>>",place_name);
-    await findPlace(place_name).then(place =>{
-        console.log(place);
-        console.log(place.length);
-        if(place[0]["_id"]!==undefined){
-            new_case["place"] = place["_id"];
-        } else {
-            console.log("The place doesn't exist: ",place_name);
-            flag = true;
-        }
-        if(!flag){
-            Case.findOne({"case_id":new_case["case_id"]},async (err,docs)=>{
-                if(docs===null || docs.length===0){
-                    let newcase = new Case(new_case);
-                    newcase.save(err=>{
-                        console.log(err);
+    return new Promise(async (resolve,reject)=>{
+        let flag = false;
+        var place_name = new_case["place_and_date"]["place"];
+        await findPlace(place_name).then(async place =>{
+            // console.log(place);
+            // console.log(place.length);
+            if(place.length===1 && place[0]!==null && place[0]["status"] === "OK"){
+                new_case["place_and_date"]["place"] = place[0]["_id"];
+            } else {
+                console.log("The place is not correct: ", place_name, new_case);
+                // console.log("The place may have lots of results: ", place_name);
+                flag = true;
+            }
+            if(!flag){
+                let caseID = null;
+                await Case.findOne({"case_id":new_case["case_id"]},async (err,docs)=>{
+                    if(docs===null || docs.length===0){
+                        let newcase = new Case(new_case);
+                        caseID = newcase["_id"];
+                        newcase.save(err=>{
+                            console.log(err);
+                        });
+                    }else{
+                        caseID = docs["_id"];
+                        await Case.findOne({"case_id":new_case["case_id"],
+                            "place_and_date.place":new_case["place_and_date"]["place"],
+                            "place_and_date.start_date":new_case["place_and_date"]["start_date"],
+                            "place_and_date.end_date":new_case["place_and_date"]["end_date"]
+                        },async (err,docs)=>{
+                                if(docs===null || docs.length===0){
+                                    const res = await Case.updateOne({"case_id":new_case["case_id"]},{$addToSet:{place_and_date:new_case["place_and_date"]}});
+                                    console.log("Place updated result: ", res.n,res.nModified);
+                                }
+                        });
+                    };
+                }).then(async ()=>{
+                    const res = await Place.updateOne({_id:place[0]["_id"]},{
+                        flag:true,
+                        cases:caseID
                     });
-                }else{
-                    const res = await Case.updateOne({"case_id":new_case["case_id"]},{$addToSet:{place_and_date:new_case["place_and_date"][0]}});
-                    console.log(res.n,res.nModified);
-                }
-            });
-        };
+                    console.log("Place updated result", res.n, res.nModified);
+                    resolve(true);
+                })
+            } else {
+                resolve(false);
+            }
+        });
     });
 }
 

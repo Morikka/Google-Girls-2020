@@ -4,8 +4,8 @@ const db = require('./db');
 
 async function test1(){
     let email = "test@t.t"
-    let place = "香港大學";
-    // let place = "711";
+    // let place = "香港大學";
+    let place = "711";
     // let place = "Wellcome";
 
     // Promise.all([db.getUser(email),db.findPlace(place)]).then(res => {
@@ -13,7 +13,7 @@ async function test1(){
     //     let placeID = res[1];
     //     consol   e.log(userID);
     //     console.log(placeID);
-    //     db.setPlace(userID["_id"],placeID[0]["_id"],1).then(x => console.log(x)).catch(err=>console.error(err));
+    //     db.setPlace(userID["_id"],placeID[0]["_id"],3).then(x => console.log(x)).catch(err=>console.error(err));
     // })
 
     let res = await Promise.all([db.getUser(email),db.findPlace(place)]);
@@ -22,7 +22,7 @@ async function test1(){
     console.log(userID);
     console.log(placeID);
     if(placeID[0]["_id"] !== undefined && userID["_id"] !== undefined)
-        db.setPlace(userID["_id"],placeID[0]["_id"],4,"2020-07-03").then(x => console.log(x)).catch(err=>console.error(err));
+        db.setPlace(userID["_id"],placeID[0]["_id"],3,"2020-07-03").then(x => console.log(x)).catch(err=>console.error(err));
     else {
         console.log(placeID[0]);
         console.log(userID);
@@ -63,3 +63,18 @@ function test3(){
 // }
 //
 // test5();
+
+function test6(){
+    var retries = 3;
+    var p = db.findPlace("Ngau Chi Wan Bun Kee Congee & Noodle Foods, Ping Shek Estate").then(x=>{
+        console.log(x);
+    });
+    for (var i = 0; i < retries; i++) {
+        p = p.catch(db.findPlace("Ngau Chi Wan Bun Kee Congee & Noodle Foods, Ping Shek Estate").then(x=>{
+            console.log(x);
+        }));
+    }
+    return p;
+}
+
+test6();
