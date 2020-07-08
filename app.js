@@ -81,7 +81,12 @@ io.on('connection', (socket) => {
     });
 
     socket.on('searchNearby',async (msg)=>{
-        await db.searchNearby(msg["placeID"],msg["type"]).then(x=> socket.emit("searchNearbyRes",x));
+        console.log("searchNearby>>>",msg["PlaceID"],msg["type"]);
+        await db.searchNearby(msg["PlaceID"],msg["type"]).then(
+            x=> {
+                console.log(x);
+                socket.emit("searchNearbyRes",x)
+            });
     });
 
     //get user Info

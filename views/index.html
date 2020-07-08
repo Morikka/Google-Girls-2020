@@ -562,7 +562,7 @@
             console.log("click marker");
             infowindow.open(marker.get("map"), marker);
             var temp = {
-                "_id": id,
+                "PlaceID": id,
                 "type": 1,
             }
             socket.emit('searchNearby', temp);

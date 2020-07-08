@@ -476,14 +476,15 @@ async function checkPlace(){
 // 2 -> nearby restaurants
 
 async function searchNearby(placeID,type){
+    console.log("Place ID is: ",placeID);
+    console.log("Type is: ",type);
     return new Promise(async (resolve,reject) => {
         await getPlaceByID(placeID).then(place=>{
+            console.log(">>>>?",place);
             const geo = place["geometry"]
-            if(type == 1){
-                findCaseByGeo1(geo,true).then(x=>resolve(x));
-            } else if (type == 2){
-
-
+                if(type == 1){
+                    findCaseByGeo1(geo,true).then(x=>resolve(x));
+                } else if (type == 2){
             } else {
                 resolve(false);
             }
