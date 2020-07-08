@@ -69,14 +69,16 @@ io.on('connection', (socket) => {
         console.log('user ID: ' + userID);
         console.log('search: ' + msg);
         await db.findPlace(msg).then(async place=>{
-            if(place[0]==='null'){
-                await db.findPlace(msg).then(place=>{
-                    socket.emit('searchRes', place);
-                });
-            }else{
-                socket.emit('searchRes', place);
-            };
-        })
+            socket.emit("searchRes",place);}
+            // if(place[0]==='null'){
+            //     await db.findPlace(msg).then(place=>{
+            //         socket.emit('searchRes', place);
+            //     });
+            // }else{
+            //     socket.emit('searchRes', place);
+            // };
+            // }
+        )
         // console.log("Place is", place);
         // socket.emit('searchRes', place);
     });
@@ -88,9 +90,7 @@ io.on('connection', (socket) => {
     socket.on("setEmail",async (msg) => {
         console.log(msg);
         await db.setEmail(userID,msg).then(async x=>{
-            if(x != msg) {
-                    await db.setEmail(userID, msg);
-                }
+                    socket.emit("setEmailRes",x);
             }
         );
     })
@@ -112,11 +112,14 @@ io.on('connection', (socket) => {
     //set place
     socket.on('setPlace',async (msg) =>{
         console.log(msg);
-        await db.setPlace(userID,msg["id"],msg["type"],msg["date"]).then(x=>{
-            if(x===null || x['n']!==1){
-                db.setPlace(userID,msg["id"],msg["type"],msg["date"]);
-            }
-        })
+        await db.setPlace(userID,msg["id"],msg["type"],msg["date"]).then(x=>
+        {socket.emit('setPlaceRes',x);}
+        // {
+        //     if(x===null || x['n']!==1){
+        //         db.setPlace(userID,msg["id"],msg["type"],msg["date"]);
+        //     }
+        // }
+        )
     });
 });
 
