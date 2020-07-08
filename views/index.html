@@ -647,6 +647,42 @@ $("#set_home").click(function(event) {
     return false;
 });
 
+$("#set_work").click(function(event) {
+    event.preventDefault(); // prevents page reloading
+    console.log("set_work");
+    // console.log(event);
+    var loc = temp_place["geometry"];
+    work_loc = temp_place["_id"];
+    var uluru = loc;
+    var map = new google.maps.Map(
+        document.getElementById('map'), {zoom: 15, center: uluru});
+    var marker = new google.maps.Marker({position: uluru, map: map});
+
+
+    // TODO: send the temp_place to database
+    var temp_msg = {
+        "id": work_loc,
+        "type": 2,
+    };
+    socket.emit('setPlace', temp_msg);
+    var count = 5;
+    while(count >=0) {
+        if(!flag_set_plc){
+            socket.emit('setPlace', temp_msg);
+            console.log("reset place");
+        } else {
+            break;
+        }
+        count--;
+    }
+    flag_set_plc = 0;
+
+    {
+        menuBox.style.display = "none";
+    }
+    return false;
+});
+
 socket.on("setPlaceRes",(tem_msg)=>{
     console.log(tem_msg);
     if(tem_msg['n'] === 1){
