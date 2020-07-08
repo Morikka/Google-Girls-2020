@@ -588,6 +588,7 @@ function attachSecretMessage(marker, secretMessage, id) {
 
     });
 }
+var flag_set_plc = 0;
 
 $("#set_home").click(function(event) {
     event.preventDefault(); // prevents page reloading
@@ -607,11 +608,27 @@ $("#set_home").click(function(event) {
         "type": 1,
     };
     socket.emit('setPlace', temp_msg);
-
-
+    var count = 10;
+    while(count >=0) {
+        if(!flag_set_plc){
+            socket.emit('setPlace', temp_msg);
+            console.log("reset place");
+        } else {
+            break;
+        }
+        count--;
+    }
 
     menuBox.style.display = "none";
     return false;
+});
+
+socket.on("setPlaceRes",(tem_msg)=>{
+    console.log(tem_msg);
+    if(tem_msg['n'] === 1){
+        flag_set_plc = 1;
+    }
+
 });
 
 
