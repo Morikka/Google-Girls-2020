@@ -80,8 +80,8 @@ io.on('connection', (socket) => {
         console.log("Place is", place);
     });
 
-    socket.on('searchNearby',(msg)=>{
-
+    socket.on('searchNearby',async (msg)=>{
+        await db.searchNearby(msg["placeID"],msg["type"]).then(x=> socket.emit("searchNearbyRes",x));
     });
 
     //get user Info
