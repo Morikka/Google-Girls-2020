@@ -606,10 +606,17 @@
     }
     var markers = []
     function drop(neighborhoods) {
-        markers = [];
+        clearMarkers();
         for (var i = 0; i < neighborhoods.length; i++) {
             addMarkerWithTimeout(neighborhoods[i], i * 200);
         }
+    }
+    
+    function clearMarkers() {
+        for (var i = 0; i < markers.length; i++) {
+            markers[i].setMap(null);
+        }
+        markers = [];
     }
 
     function addMarkerWithTimeout(position, timeout) {
