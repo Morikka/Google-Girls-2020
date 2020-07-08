@@ -332,26 +332,30 @@ async function addCase(new_case){
                     if(docs===null || docs.length===0){
                         let newcase = new Case(new_case);
                         caseID = newcase["_id"];
+                        console.log("Case ID 1: ",caseID);
                         newcase.save(err=>{
                             console.log(err);
                         });
+                        resolve(caseID);
                     }else{
-                        caseID = docs["_id"];
+                        console.log("Case ID 2: ",caseID);
                         await Case.findOne({"case_id":new_case["case_id"],
                             "place_and_date.place":new_case["place_and_date"]["place"],
                             "place_and_date.start_date":new_case["place_and_date"]["start_date"],
                             "place_and_date.end_date":new_case["place_and_date"]["end_date"]
-                        },async (err,docs)=>{
+                        }, async (err,docs)=>{
                                 if(docs===null || docs.length===0){
                                     const res = await Case.updateOne({"case_id":new_case["case_id"]},{$addToSet:{place_and_date:new_case["place_and_date"]}});
                                     console.log("Place updated result: ", res.n,res.nModified);
                                 }
                         });
+                        resolve(caseID);
                     };
-                }).then(async ()=>{
+                }).then(async (caseID)=>{
+                    console.log("Check Case ID is:",caseID);
                     const res = await Place.updateOne({_id:place[0]["_id"]},{
                         flag:true,
-                        cases:caseID
+                        $addToSet:{cases:caseID}
                     });
                     console.log("Place updated result", res.n, res.nModified);
                     resolve(true);
@@ -362,28 +366,60 @@ async function addCase(new_case){
         });
     });
 }
-
-async function findCaseByGeo(geo){
+//if flag = true: add date check
+async function findCaseByGeo1(geo,flag){
     let lat = geo["lat"];
     let lng = geo["lng"];
     let new_lat = 500 * 0.0000089;
     let new_lng = new_lat / Math.cos(lat * 0.018);
+    let cases = [];
     console.log(new_lat,new_lng);
     return new Promise(async (resolve,reject) => {
         Place.find({
-            // "flag":"False",
+            "flag":"true",
             "geometry.lat":{$lt:lat+new_lat,$gt:lat-new_lat},
             "geometry.lng":{$lt:lng+new_lng,$gt:lat-new_lng}
         },(err,docs)=>{
-            console.log(docs);
-            let cases = [];
+            resolve(docs);
+        })
+    });
+}
+
+//if flag = true: add date check
+async function findCaseByGeo(geo,flag){
+    let lat = geo["lat"];
+    let lng = geo["lng"];
+    let new_lat = 500 * 0.0000089;
+    let new_lng = new_lat / Math.cos(lat * 0.018);
+    let cases = [];
+    console.log(new_lat,new_lng);
+    return new Promise(async (resolve,reject) => {
+        Place.find({
+            "flag":"true",
+            "geometry.lat":{$lt:lat+new_lat,$gt:lat-new_lat},
+            "geometry.lng":{$lt:lng+new_lng,$gt:lat-new_lng}
+        },async (err,docs)=>{
+            console.log("Finded: ",docs);
             for(const place in docs){
-                console.log(place);
+                // console.log(place);
                 console.log(docs[place]);
                 cases[place] = {}
                 cases[place]["mapName"] = docs[place]["mapName"];
-                cases[place]["cases"] = docs[place]["cases"];
+                cases[place]["cases"] = [];
+                const doc_cases = docs[place]["cases"];
+                let tmp = {};
+                for(const item in doc_cases){
+                    console.log(doc_cases[item]);
+                    console.log(doc_cases[item]["_id"]);
+                    await getCaseByID(doc_cases[item]["_id"]).then(x=>{
+                            cases[place]["cases"].push(x);
+                            // console.log("???>",cases);
+                        }
+                    );
+                }
             }
+            // console.log(cases);
+        }).then(()=>{
             console.log(cases);
             resolve(cases);
         });
@@ -399,12 +435,12 @@ async function checkPlace(){
         // Check Home
         const home = await getPlaceByID(user["home"]);
         email_res["home"] = home["mapName"];
-        email_res["home_case"] = await findCaseByGeo(home["geometry"]);
+        email_res["home_case"] = await findCaseByGeo(home["geometry"],false);
 
         //Check Work
         const work = await getPlaceByID(user["work"]);
         email_res["work"] = work["mapName"];
-        email_res["work_case"] = await findCaseByGeo(work["geometry"]);
+        email_res["work_case"] = await findCaseByGeo(work["geometry"],false);
 
         //Check email
         email_res["fav_places"] = {}
@@ -435,13 +471,34 @@ async function checkPlace(){
     }
 }
 
+// type
+// 1 -> nearby cases
+// 2 -> nearby restaurants
+
+async function searchNearby(placeID,type){
+    return new Promise(async (resolve,reject) => {
+        await getPlaceByID(placeID).then(place=>{
+            const geo = place["geometry"]
+            if(type == 1){
+                findCaseByGeo1(geo,true).then(x=>resolve(x));
+            } else if (type == 2){
+
+
+            } else {
+                resolve(false);
+            }
+        })
+    });
+}
+
+
 exports.getUser = getUser;
 // exports.getInfo = getInfo;
 
 exports.setPlace = setPlace;
 exports.findPlace = findPlace;
 exports.findPlaceType = findPlaceType;
-// exports.updatePlace = updatePlace;
+exports.searchNearby = searchNearby;
 
 // private
 exports.textSearch = textSearch;

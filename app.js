@@ -80,6 +80,10 @@ io.on('connection', (socket) => {
         console.log("Place is", place);
     });
 
+    socket.on('searchNearby',(msg)=>{
+
+    });
+
     //get user Info
     socket.emit('user',user);
 
@@ -137,28 +141,11 @@ if (module === require.main) {
 }
 // [END appengine_websockets_app]
 
-async function searchPlace(msg){
-    console.log("??????");
-    var retries = 3;
-    function recurse(i) {
-         return db.findPlace(msg).then(e=> {
-             console.log("????: ", e, i);
-             if (i < retries && e[0] === null) {
-                 return recurse(++i);
-             } else {
-                 return e;
-             }
-             throw e;
-         }).catch(e => console.error(e));
-    }
-    recurse(0);
-}
-
 async function setPlace(msg){
     var retries = 5;
     function recurse(i) {
         db.setPlace(userID,msg["id"],msg["type"],msg["date"]).then(e =>{
-            console.log("????: ",e,i);
+            // console.log("????: ",e,i);
             if (i < retries && e["n"]!==1) {
                 recurse(++i);
             }

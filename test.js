@@ -58,17 +58,18 @@ function test3(){
 //
 // test4();
 
-// async function test5(){
-//     db.findPlaceType("food");
-// }
-//
-// test5();
-
-function test6(){
-    var retries = 3;
-    var p = db.findPlace("Ngau Chi Wan Bun Kee Congee & Noodle Foods, Ping Shek Estate").then(x=>{
-        console.log(x);
-    });
+async function test5(){
+    // db.searchNearby("5f05be3723a204a79ea85803",1).then(x=>console.log(x));
+    db.searchNearby("5f05ca2495e518aec24af03f",1).then(x=>console.log(x));
 }
 
-test6();
+test5();
+
+// function test6(){
+//     var retries = 3;
+//     var p = db.findPlace("Ngau Chi Wan Bun Kee Congee & Noodle Foods, Ping Shek Estate").then(x=>{
+//         console.log(x);
+//     });
+// }
+//
+// test6();
