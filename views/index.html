@@ -529,14 +529,14 @@
                 menuDisplayed = true;
             }, false);
 
-
-            google.maps.event.addListener(map, "click", function(event) {
-                console.log('click on map.');
-                placeMarkerAndPanTo(event.latLng, map);
-                if (menuDisplayed == true) {
-                    menuBox.style.display = "none";
-                }
-            });
+            //TODO: add marker on map, maybe use later
+            // google.maps.event.addListener(map, "click", function(event) {
+            //     console.log('click on map.');
+            //     placeMarkerAndPanTo(event.latLng, map);
+            //     if (menuDisplayed == true) {
+            //         menuBox.style.display = "none";
+            //     }
+            // });
 
 
         } else {
