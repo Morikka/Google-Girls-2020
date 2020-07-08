@@ -294,6 +294,7 @@
         socket.emit('search', $('#search_txt').val());
         return false;
     });
+    map;
 
     var user_id;
     var email_ad;
@@ -356,7 +357,7 @@
             // console.log("btn_fav" + i);
             var loc = vis_locs_add[i];
             var uluru = loc;
-            var map = new google.maps.Map(
+            map = new google.maps.Map(
                 document.getElementById('map'), {zoom: 15, center: uluru});
             var marker = new google.maps.Marker({position: uluru, map: map});
             attachSecretMessage(marker, name+"<br>"+time, data["_id"]);
@@ -394,7 +395,7 @@
             // console.log("btn_fav" + i);
             var loc = fav_locs_add[i];
             var uluru = loc;
-            var map = new google.maps.Map(
+            map = new google.maps.Map(
                 document.getElementById('map'), {zoom: 15, center: uluru});
             var marker = new google.maps.Marker({position: uluru, map: map});
             attachSecretMessage(marker, name, data["_id"]);
@@ -415,7 +416,7 @@
                 // console.log(data);
                 var loc = data["geometry"];
                 var uluru = loc;
-                var map = new google.maps.Map(
+                map = new google.maps.Map(
                     document.getElementById('map'), {zoom: 15, center: uluru});
                 var marker = new google.maps.Marker({position: uluru, map: map});
                 attachSecretMessage(marker, "Home", data["_id"]);
@@ -461,7 +462,7 @@
                 console.log(data);
                 var loc = data["geometry"];
                 var uluru = loc;
-                var map = new google.maps.Map(
+                map = new google.maps.Map(
                     document.getElementById('map'), {zoom: 15, center: uluru});
                 var marker = new google.maps.Marker({position: uluru, map: map});
                 attachSecretMessage(marker, "Work", data["_id"]);
@@ -479,7 +480,7 @@
         //console.log(data);
         if(data[0]["status"] === 'OK') {
             var locations = [];
-            var mapNames = [];
+            mapNames = [];
             var loc_ids = [];
             var uluru = data[0]["geometry"];
             // console.log(uluru);
@@ -493,7 +494,7 @@
                     // console.log(data[i]["_id"]);
                 }
             }
-            var map = new google.maps.Map(
+            map = new google.maps.Map(
                 document.getElementById('map'), {zoom: 15, center: uluru});
 
             var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -603,12 +604,32 @@
 
         });
     }
+    var markers = []
+    function drop(neighborhoods) {
+        markers = [];
+        for (var i = 0; i < neighborhoods.length; i++) {
+            addMarkerWithTimeout(neighborhoods[i], i * 200);
+        }
+    }
+
+    function addMarkerWithTimeout(position, timeout) {
+        window.setTimeout(function() {
+            markers.push(
+                new google.maps.Marker({
+                    position: position,
+                    map: map,
+                    animation: google.maps.Animation.DROP,
+                    icon: '../public/icon_case.png',
+                })
+            );
+        }, timeout);
+    }
 
     socket.on('searchNearbyRes',(data)=>{
         console.log(data);
         if(data[0]["status"] === 'OK') {
             var locations = [];
-            var mapNames = [];
+            mapNames = [];
             var loc_ids = [];
             var uluru = data[0]["geometry"];
             // console.log(uluru);
@@ -622,64 +643,7 @@
                     // console.log(data[i]["_id"]);
                 }
             }
-            var map = new google.maps.Map(
-                document.getElementById('map'), {zoom: 15, center: uluru});
-
-            // var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            var iconBase =
-                'https://developers.google.com/maps/documentation/javascript/examples/full/images/';
-
-            var icons = {
-                parking: {
-                    icon: iconBase + 'parking_lot_maps.png'
-                },
-                library: {
-                    icon: iconBase + 'library_maps.png'
-                },
-                info: {
-                    icon: iconBase + 'info-i_maps.png'
-                }
-            };
-
-            var markers = locations.map(function(location, j) {
-                var marker = new google.maps.Marker({
-                    position: location,
-                    icon: icons['info'],
-                    // label: labels[j % labels.length]
-                });
-                attachSecretMessage(marker, mapNames[j], loc_ids[j]);
-                return marker;
-            });
-
-            var markerCluster = new MarkerClusterer(map, markers,
-                {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
-
-
-            var menuDisplayed = false;
-            var menuBox = null;
-
-            window.addEventListener("contextmenu", function() {
-                var left = arguments[0].clientX;
-                var top = arguments[0].clientY;
-
-                menuBox = document.getElementById("menu");
-                menuBox.style.left = left + "px";
-                menuBox.style.top = top + "px";
-                menuBox.style.display = "block";
-
-                arguments[0].preventDefault();
-
-                menuDisplayed = true;
-            }, false);
-
-
-            google.maps.event.addListener(map, "click", function(event) {
-                console.log('click on map.');
-                placeMarkerAndPanTo(event.latLng, map);
-                if (menuDisplayed == true) {
-                    menuBox.style.display = "none";
-                }
-            });
+            drop(locations);
 
 
         } else {
@@ -695,7 +659,7 @@
         var loc = temp_place["geometry"];
         home_loc = temp_place["_id"];
         var uluru = loc;
-        var map = new google.maps.Map(
+        map = new google.maps.Map(
             document.getElementById('map'), {zoom: 15, center: uluru});
         var marker = new google.maps.Marker({position: uluru, map: map});
 
@@ -718,7 +682,7 @@
         var loc = temp_place["geometry"];
         work_loc = temp_place["_id"];
         var uluru = loc;
-        var map = new google.maps.Map(
+        map = new google.maps.Map(
             document.getElementById('map'), {zoom: 15, center: uluru});
         var marker = new google.maps.Marker({position: uluru, map: map});
 
@@ -753,7 +717,7 @@
             // console.log("btn_fav" + i);
             var loc = fav_locs_add[i];
             var uluru = loc;
-            var map = new google.maps.Map(
+            map = new google.maps.Map(
                 document.getElementById('map'), {zoom: 15, center: uluru});
             var marker = new google.maps.Marker({position: uluru, map: map});
             attachSecretMessage(marker, name, data["_id"]);
@@ -763,7 +727,7 @@
 
 
         var uluru = loc;
-        var map = new google.maps.Map(
+        map = new google.maps.Map(
             document.getElementById('map'), {zoom: 15, center: uluru});
         var marker = new google.maps.Marker({position: uluru, map: map});
 
@@ -801,7 +765,7 @@
             // console.log("btn_fav" + i);
             var loc = vis_locs_add[i];
             var uluru = loc;
-            var map = new google.maps.Map(
+            map = new google.maps.Map(
                 document.getElementById('map'), {zoom: 15, center: uluru});
             var marker = new google.maps.Marker({position: uluru, map: map});
             attachSecretMessage(marker, name + "<br>" + time, data["_id"]);
@@ -811,7 +775,7 @@
 
 
         var uluru = loc;
-        var map = new google.maps.Map(
+        map = new google.maps.Map(
             document.getElementById('map'), {zoom: 15, center: uluru});
         var marker = new google.maps.Marker({position: uluru, map: map});
 
@@ -838,12 +802,12 @@
 
     function change_location(){
         var uluru = {lat: -25.344, lng: 131.036};
-        var map = new google.maps.Map(
+        map = new google.maps.Map(
             document.getElementById('map'), {zoom: 4, center: uluru});
         var marker = new google.maps.Marker({position: uluru, map: map});
     }
 
-</script>
+    </script>
 
 </body>
 
