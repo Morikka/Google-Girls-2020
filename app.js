@@ -110,10 +110,12 @@ io.on('connection', (socket) => {
     })
 
     //set place
-    socket.on('setPlace',(msg) =>{
+    socket.on('setPlace',async (msg) =>{
         console.log(msg);
-        db.setPlace(userID,msg["id"],msg["type"],msg["date"]).then(x=>{
-            socket.emit("setPlaceRes",x);
+        await db.setPlace(userID,msg["id"],msg["type"],msg["date"]).then(x=>{
+            if(x===null || x['n']!==1){
+                db.setPlace(userID,msg["id"],msg["type"],msg["date"]);
+            }
         })
     });
 });
