@@ -335,7 +335,7 @@ function add_vis(){
 }
 
 socket.on('getPlaceByIDRes2',(data)=>{
-        var name = data["mapName"];
+    var name = data["mapName"];
     var loc = data["geometry"];
     // console.log(name);
     // console.log(loc);
@@ -359,7 +359,10 @@ socket.on('getPlaceByIDRes2',(data)=>{
         var map = new google.maps.Map(
             document.getElementById('map'), {zoom: 15, center: uluru});
         var marker = new google.maps.Marker({position: uluru, map: map});
-
+        attachSecretMessage(marker, name+"<br>"+time, data["_id"]);
+          {
+            menuBox.style.display = "none";
+        }
     })
 });
 
@@ -403,6 +406,11 @@ socket.on('getPlaceByIDRes',(data)=>{
         var map = new google.maps.Map(
             document.getElementById('map'), {zoom: 15, center: uluru});
         var marker = new google.maps.Marker({position: uluru, map: map});
+        attachSecretMessage(marker, name, data["_id"]);
+
+          {
+            menuBox.style.display = "none";
+        }
 
     })
 });
@@ -421,9 +429,14 @@ $("#btn_home").click(function(event) {
             var map = new google.maps.Map(
                 document.getElementById('map'), {zoom: 15, center: uluru});
             var marker = new google.maps.Marker({position: uluru, map: map});
+            attachSecretMessage(marker, "Home", data["_id"]);
+
         });
     } else {
         alert("You should set your home address first.");
+    }
+      {
+        menuBox.style.display = "none";
     }
     return false;
 });
@@ -442,6 +455,9 @@ $("#btn_email").click(function(event) {
         console.log(email_ad);
     }
     socket.emit('setEmail', email_ad);
+      {
+        menuBox.style.display = "none";
+    }
     return false;
 });
 
@@ -459,9 +475,13 @@ $("#btn_work").click(function(event) {
             var map = new google.maps.Map(
                 document.getElementById('map'), {zoom: 15, center: uluru});
             var marker = new google.maps.Marker({position: uluru, map: map});
+            attachSecretMessage(marker, "Work", data["_id"]);
         });
     } else {
         alert("You should set your work address first.");
+    }
+      {
+        menuBox.style.display = "none";
     }
     return false;
 });
@@ -565,6 +585,7 @@ function attachSecretMessage(marker, secretMessage, id) {
                         "mapName":secretMessage,
                         "_id": id,
         }
+        // console.log(temp_place);
 
         // console.log(temp_place);
         // showContextMenu(event.latLng.lat());
@@ -608,7 +629,7 @@ $("#set_home").click(function(event) {
         "type": 1,
     };
     socket.emit('setPlace', temp_msg);
-    var count = 10;
+    var count = 5;
     while(count >=0) {
         if(!flag_set_plc){
             socket.emit('setPlace', temp_msg);
@@ -620,7 +641,9 @@ $("#set_home").click(function(event) {
     }
     flag_set_plc = 0;
 
-    menuBox.style.display = "none";
+      {
+        menuBox.style.display = "none";
+    }
     return false;
 });
 
