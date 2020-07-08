@@ -628,17 +628,17 @@ $("#set_home").click(function(event) {
         "id": home_loc,
         "type": 1,
     };
+    // socket.emit('setPlace', temp_msg);
+    // var count = 1;
+    // while(count >=0) {
+    //     if(!flag_set_plc){
     socket.emit('setPlace', temp_msg);
-    var count = 5;
-    while(count >=0) {
-        if(!flag_set_plc){
-            socket.emit('setPlace', temp_msg);
-            console.log("reset place");
-        } else {
-            break;
-        }
-        count--;
-    }
+    console.log("reset place");
+        // } else {
+        //     break;
+        // }
+        // count--;
+    // }
     flag_set_plc = 0;
 
       {

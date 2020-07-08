@@ -68,19 +68,16 @@ io.on('connection', (socket) => {
     socket.on('search', async (msg) => {
         console.log('user ID: ' + userID);
         console.log('search: ' + msg);
-        await db.findPlace(msg).then(async place=>{
-            socket.emit("searchRes",place);}
-            // if(place[0]==='null'){
-            //     await db.findPlace(msg).then(place=>{
-            //         socket.emit('searchRes', place);
-            //     });
-            // }else{
-            //     socket.emit('searchRes', place);
-            // };
-            // }
+        await db.findPlace(msg).then(async place =>{
+            if(place[0]==='null'){
+                await db.findPlace(msg).then(place=>{
+                    socket.emit('searchRes', place);
+                }); } else {
+                    socket.emit('searchRes', place);
+                };
+            }
         )
-        // console.log("Place is", place);
-        // socket.emit('searchRes', place);
+        console.log("Place is", place);
     });
 
     //get user Info
@@ -89,8 +86,8 @@ io.on('connection', (socket) => {
     //set user email
     socket.on("setEmail",async (msg) => {
         console.log(msg);
-        await db.setEmail(userID,msg).then(async x=>{
-                    socket.emit("setEmailRes",x);
+        await db.setEmail(userID,msg).then(x=>{
+            socket.emit("setEmailRes",x);
             }
         );
     })
@@ -112,14 +109,10 @@ io.on('connection', (socket) => {
     //set place
     socket.on('setPlace',async (msg) =>{
         console.log(msg);
-        await db.setPlace(userID,msg["id"],msg["type"],msg["date"]).then(x=>
-        {socket.emit('setPlaceRes',x);}
-        // {
-        //     if(x===null || x['n']!==1){
-        //         db.setPlace(userID,msg["id"],msg["type"],msg["date"]);
-        //     }
-        // }
-        )
+        await setPlace(msg);
+        // await db.setPlace(userID,msg["id"],msg["type"],msg["date"]).then(x=> {
+        //     socket.emit('setPlaceRes',x);
+        // })
     });
 });
 
@@ -143,3 +136,34 @@ if (module === require.main) {
     });
 }
 // [END appengine_websockets_app]
+
+async function searchPlace(msg){
+    console.log("??????");
+    var retries = 3;
+    function recurse(i) {
+         return db.findPlace(msg).then(e=> {
+             console.log("????: ", e, i);
+             if (i < retries && e[0] === null) {
+                 return recurse(++i);
+             } else {
+                 return e;
+             }
+             throw e;
+         }).catch(e => console.error(e));
+    }
+    recurse(0);
+}
+
+async function setPlace(msg){
+    var retries = 5;
+    function recurse(i) {
+        db.setPlace(userID,msg["id"],msg["type"],msg["date"]).then(e =>{
+            console.log("????: ",e,i);
+            if (i < retries && e["n"]!==1) {
+                recurse(++i);
+            }
+            throw e;
+        }).catch(e => console.error(e));
+    }
+    recurse(0);
+}

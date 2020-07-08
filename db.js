@@ -300,7 +300,6 @@ async function setPlace(userID,placeID,type,date=null){
                 resolve(result);
             });
         }
-
     });
 }
 
