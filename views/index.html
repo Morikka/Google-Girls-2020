@@ -629,17 +629,17 @@ $("#set_home").click(function(event) {
         "type": 1,
     };
     socket.emit('setPlace', temp_msg);
-    var count = 5;
-    while(count >=0) {
-        if(!flag_set_plc){
-            socket.emit('setPlace', temp_msg);
-            console.log("reset place");
-        } else {
-            break;
-        }
-        count--;
-    }
-    flag_set_plc = 0;
+    // var count = 5;
+    // while(count >=0) {
+    //     if(!flag_set_plc){
+    //         socket.emit('setPlace', temp_msg);
+    //         console.log("reset place");
+    //     } else {
+    //         break;
+    //     }
+    //     count--;
+    // }
+    // flag_set_plc = 0;
 
       {
         menuBox.style.display = "none";
@@ -665,17 +665,17 @@ $("#set_work").click(function(event) {
         "type": 2,
     };
     socket.emit('setPlace', temp_msg);
-    var count = 5;
-    while(count >=0) {
-        if(!flag_set_plc){
-            socket.emit('setPlace', temp_msg);
-            console.log("reset place");
-        } else {
-            break;
-        }
-        count--;
-    }
-    flag_set_plc = 0;
+    // var count = 5;
+    // while(count >=0) {
+    //     if(!flag_set_plc){
+    //         socket.emit('setPlace', temp_msg);
+    //         console.log("reset place");
+    //     } else {
+    //         break;
+    //     }
+    //     count--;
+    // }
+    // flag_set_plc = 0;
 
     {
         menuBox.style.display = "none";
@@ -709,16 +709,16 @@ $("#add_fav").click(function(event) {
         "type": 3,
     };
     socket.emit('setPlace', temp_msg);
-    var count = 5;
-    while(count >=0) {
-        if(!flag_set_plc){
-            socket.emit('setPlace', temp_msg);
-            console.log("reset place");
-        } else {
-            break;
-        }
-        count--;
-    }
+    // var count = 5;
+    // while(count >=0) {
+    //     if(!flag_set_plc){
+    //         socket.emit('setPlace', temp_msg);
+    //         console.log("reset place");
+    //     } else {
+    //         break;
+    //     }
+    //     count--;
+    // }
     flag_set_plc = 0;
 
     {
@@ -729,9 +729,9 @@ $("#add_fav").click(function(event) {
 
 socket.on("setPlaceRes",(tem_msg)=>{
     console.log(tem_msg);
-    if(tem_msg['n'] === 1){
-        flag_set_plc = 1;
-    }
+    // if(tem_msg['n'] === 1){
+    //     flag_set_plc = 1;
+    // }
 
 });
 
