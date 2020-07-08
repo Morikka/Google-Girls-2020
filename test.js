@@ -69,12 +69,6 @@ function test6(){
     var p = db.findPlace("Ngau Chi Wan Bun Kee Congee & Noodle Foods, Ping Shek Estate").then(x=>{
         console.log(x);
     });
-    for (var i = 0; i < retries; i++) {
-        p = p.catch(db.findPlace("Ngau Chi Wan Bun Kee Congee & Noodle Foods, Ping Shek Estate").then(x=>{
-            console.log(x);
-        }));
-    }
-    return p;
 }
 
 test6();
