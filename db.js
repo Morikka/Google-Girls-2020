@@ -4,15 +4,14 @@ require('mongoose-double')(mongoose);
 
 const https = require('https');
 const qs = require('qs');
-
+const key = require('./key');
 // The database part
 // const dbName = 'ggirls';
 // use test database first
 const dbName = 'test';
 
-const url = "mongodb+srv://mio:Jcu3gbEBnzhd3BHL@ggirls-rw5nh.gcp.mongodb.net/"+dbName+"?retryWrites=true&w=majority";
-const email = require('./email');
-
+const url = key.url;
+console.log(url);
 
 mongoose.connect(url, {useNewUrlParser: true, useUnifiedTopology: true});
 const db = mongoose.connection;
@@ -120,7 +119,7 @@ async function getCaseByID(id){
 
 async function searchPlace(input){
     var query = {
-        key:"AIzaSyCfEfBinkiInzbXiapMhgpsXpN03Q3dSGc",
+        key:key.placekey,
         input:input,
         inputtype:"textquery",
         fields:"geometry,name,place_id,types"
@@ -167,7 +166,7 @@ async function searchPlace(input){
 // Search all places by text search API (like wellcome, blabla).
 function textSearch(input){
     var query = {
-        key:"AIzaSyCfEfBinkiInzbXiapMhgpsXpN03Q3dSGc",
+        key:key.placekey,
         query:input+" in Hong Kong",
         // region:"hk",
     }
