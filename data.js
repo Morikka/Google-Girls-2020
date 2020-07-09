@@ -4,7 +4,7 @@ const db = require('./db');
 const { Writable } = require('stream');
 
 var test = 0;
-const rs = fs.createReadStream('data1.csv');
+const rs = fs.createReadStream('data.csv');
 var csvParser = rs.pipe(csv())
     .pipe(new Writable({
         // Change async code to sync

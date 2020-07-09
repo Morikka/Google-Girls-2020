@@ -5,3 +5,6 @@ node_modules*
 #test.js
 
 key.js
+tmp_data.csv
+Demo*
+*.xlsx

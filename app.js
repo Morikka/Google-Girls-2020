@@ -119,9 +119,12 @@ io.on('connection', (socket) => {
     socket.on('setPlace',async (msg) =>{
         console.log(msg);
         await setPlace(msg);
-        // await db.setPlace(userID,msg["id"],msg["type"],msg["date"]).then(x=> {
-        //     socket.emit('setPlaceRes',x);
-        // })
+    });
+
+    //set place
+    socket.on('deletePlace',async (msg) =>{
+        console.log(msg);
+        await deletePlace(msg);
     });
 });
 
