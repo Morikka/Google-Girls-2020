@@ -28,7 +28,7 @@ for(const item in home_case){
     var tmp = "The place "+place_name+" has cases, the cases is as follows: <br>"
     for(const items in home_case[item]["cases"]){
         // console.log(items)
-        tmp += "Case id is: "+home_case[item]["cases"][items]["caseID"]+", the start time is: "+home_case[item]["cases"][items]["start-date"] + " the end time is: "+home_case[item]["cases"][items]["end_date"] + "<br>";
+        tmp += "Case id is: "+home_case[item]["cases"][items]["caseID"]+", the start time is: "+home_case[item]["cases"][items]["start_date"] + " the end time is: "+home_case[item]["cases"][items]["end_date"] + "<br>";
     }
     home_notification += tmp;
 }
@@ -41,7 +41,7 @@ for(const item in work_case){
     var tmp2 = "The place "+place_name+" has cases, the cases is as follows: <br>"
     for(const items in work_case[item]["cases"]){
         console.log(items)
-        tmp2 += "Case id is: "+work_case[item]["cases"][items]["caseID"]+", the start time is: "+work_case[item]["cases"][items]["start-date"] + " the end time is: "+work_case[item]["cases"][items]["end_date"] + "<br>";
+        tmp2 += "Case id is: "+work_case[item]["cases"][items]["caseID"]+", the start time is: "+work_case[item]["cases"][items]["start_date"] + " the end time is: "+work_case[item]["cases"][items]["end_date"] + "<br>";
     }
     work_notification += tmp2;
 }
@@ -55,7 +55,7 @@ for(const item in fav){
         var tmp2 = "The place "+place_name+" has cases, the cases is as follows: <br>"
         for(const items in fav[item]["cases"]){
             console.log(items)
-            tmp2 += "Case id is: "+fav[item]["cases"][items]["caseID"]+", the start time is: "+fav[item]["cases"][items]["start-date"] + " the end time is: "+fav[item]["cases"][items]["end_date"] + "<br>";
+            tmp2 += "Case id is: "+fav[item]["cases"][items]["caseID"]+", the start time is: "+fav[item]["cases"][items]["start_date"] + " the end time is: "+fav[item]["cases"][items]["end_date"] + "<br>";
         }
     }
     else{
@@ -69,11 +69,12 @@ var vis_notification = "Now your visit place: <br>";
 for(const item in vis){
     console.log(vis[item]);
     const place_name = vis[item]["mapName"];
+    const place_date = vis[item]["vis_Date"];
     if (vis[item]["flag"]){
-        var tmp2 = "The place "+place_name+" has cases, the cases is as follows: <br>"
+        var tmp2 = "The place "+place_name+" at place_date "+ place_date + " has cases, the cases is as follows: <br>"
         for(const items in vis[item]["cases"]){
             console.log(items)
-            tmp2 += "Case id is: "+vis[item]["cases"][items]["caseID"]+", the start time is: "+vis[item]["cases"][items]["start-date"] + " the end time is: "+vis[item]["cases"][items]["end_date"]+"<br>";
+            tmp2 += "Case id is: "+vis[item]["cases"][items]["caseID"]+", the start time is: "+vis[item]["cases"][items]["start_date"] + " the end time is: "+vis[item]["cases"][items]["end_date"]+"<br>";
         }
     }
     else{
@@ -95,6 +96,8 @@ var sendHtml = `<div>
       <br>
       <div>vis_places : ${vis_notification}</div>
     </div>`;
+
+console.log(sendHtml);
 
 var mailOptions = {
     // 发送邮件的地址

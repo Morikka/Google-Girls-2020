@@ -1,31 +1,30 @@
 var json = {
     email: "user_email",
-    home: '香港大學',
+    home: '大围名城',
     home_case: [
-        { mapName: '香港大學', cases: [
-                {caseID:1,"start_date":"2020-07-01","end_date":"2020-07-15"},
-                {caseID:10,"start_date":"2020-07-02","end_date":"2020-07-16"}
+        { mapName: '大圍街市', cases: [
+                {caseID:1233,"start_date":"2020-06-24","end_date":"2020-06-24"}
             ]},
-        { mapName: 'Wellcome', cases: [
-                {caseID:12,"start_date":"2020-07-01","end_date":"2020-07-15"},
-                {caseID:18,"start_date":"2020-07-01","end_date":"2020-07-15"}
+        { mapName: '美田邨購物商場', cases: [
+                {caseID:1233,"start_date":"2020-06-25","end_date":"2020-06-25"}
             ]}
     ],
-    work: '香港大學',
-    work_case: [
-        { mapName: '香港大學', cases: [
-                {caseID:80,"start_date":"2020-07-01","end_date":"2020-07-15"},
-                {caseID:12,"start_date":"2020-07-02","end_date":"2020-07-16"}
-                ]},
-    ],
+    work: '香港城市大学',
+    work_case: [],
     fav_places: {
-        '0': { mapName: '香港大學', flag: false, cases: [] },
-        '1': { mapName: '7-11 便利店', flag: false, cases: [] },
-        '2': { mapName: 'Wellcome', flag: true, cases: [
-                {caseID:90,"start_date":"2020-07-01","end_date":"2020-07-15"}
+        '0': { mapName: '又一城', flag: false, cases: [] },
+        '1': { mapName: '朗豪坊', flag: false, cases: [] },
+        '2': { mapName: '西九龙中心', flag: true, cases: [
+                {caseID:1233,"start_date":"2020-06-24","end_date":"2020-06-24"},
+                {caseID:1263,"start_date":"2020-06-24","end_date":"2020-06-24"}
             ]}
     },
     vis_places: {
-        '0': { mapName: '香港大學', flag: false, cases: [] }}
+        '0': { mapName: '新城市廣場', vis_date:"2020-06-26", flag: true, cases: [
+                {caseID:1233,"start_date":"2020-06-24","end_date":"2020-06-24"}
+            ] },
+        '1': { mapName: '新城市廣場', vis_date:"2020-07-03", flag: false, cases: [] },
+        '2': { mapName: '香港科技大学', vis_date:"2020-07-05", flag: false, cases: [] }
+    }
 }
 module.exports.json = json;
