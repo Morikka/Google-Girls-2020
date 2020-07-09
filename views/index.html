@@ -374,6 +374,11 @@
             $("a").remove("#btn_vis" + i);
 
             // TODO: remove item from database
+            var temp_msg = {
+                "id": data["_id"],
+                "type": 4,
+            };
+            socket.emit('deletePlace', temp_msg);
 
             menuBox.style.display = "none";
 
@@ -426,6 +431,11 @@
             $("a").remove("#btn_fav" + i);
 
             // TODO: remove item from database
+            var temp_msg = {
+                "id": data["_id"],
+                "type": 3,
+            };
+            socket.emit('deletePlace', temp_msg);
 
             menuBox.style.display = "none";
 
@@ -773,6 +783,11 @@
             $("a").remove("#btn_fav" + i);
 
             // TODO: remove item from database
+            var temp_msg = {
+                "id": data["_id"],
+                "type": 3,
+            };
+            socket.emit('deletePlace', temp_msg);
 
             menuBox.style.display = "none";
 
@@ -835,6 +850,11 @@
             $("a").remove("#btn_vis" + i);
 
             // TODO: remove item from database
+            var temp_msg = {
+                "id": data["_id"],
+                "type": 4,
+            };
+            socket.emit('deletePlace', temp_msg);
 
             menuBox.style.display = "none";
 
