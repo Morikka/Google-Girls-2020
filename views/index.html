@@ -365,6 +365,20 @@
                 menuBox.style.display = "none";
             }
         })
+        $("#btn_vis" + i).dblclick(function(event) {
+
+            console.log("dbclikd");
+            event.preventDefault(); // prevents page reloading
+            console.log(temp);
+
+            $("a").remove("#btn_vis" + i);
+
+            // TODO: remove item from database
+
+            menuBox.style.display = "none";
+
+        })
+
     });
 
 
@@ -403,7 +417,26 @@
             menuBox.style.display = "none";
 
         })
+        $("#btn_fav" + i).dblclick(function(event) {
+
+            console.log("dbclikd");
+            event.preventDefault(); // prevents page reloading
+            console.log(temp);
+
+            $("a").remove("#btn_fav" + i);
+
+            // TODO: remove item from database
+
+            menuBox.style.display = "none";
+
+        })
     });
+
+    function arrayRemove(arr, value) {
+        return arr.filter(function(ele){
+            return ele != value;
+        });
+    }
 
     $("#btn_home").click(function(event) {
         event.preventDefault(); // prevents page reloading
