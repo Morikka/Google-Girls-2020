@@ -28,61 +28,57 @@ Create a cron job `/api/update_data` from google app engine to automatically sen
 
 # Database Settings
 
-+ User
++ users
 
 ```json
 {
-   "_id":"_id",
-   "email":"user google email",
-   "home":"place_id",
-   "work":"place_id",
+   "_id":"user_id, the private key and a unique indentifier for a user",
+   "email":"user login google email account",
+   "home":"place_id, a foreign key to the place table",
+   "work":"place_id, a foreign key to the place table",
    "fav_places":
    [
-        {"fav_place":"place_id"},
-        {"fav_place":"place_id"}
+        {"fav_place":"place_id, a foreign key to the place table"}
    ],
     "vis_places":
     [
         {
-            "vis_place":"place_id",
-            "vis_date":"date"
-        },
-        {
-            "vis_place":"place_id",
-            "vis_date":"date"
-        }
+            "vis_place":"place_id, a foreign key to the place table",
+            "vis_date":"date, stores user’s visit date, the default value is today"
+        }    
     ],
-  "contact_email": "user email"
+  "contact_email": "user contact email, the default value is the login gmail account"
 }
 ```
-+ Place
++ places
 ```json
 {
-    "_id":"place_id",
-    "mapID":"Google MAP API", 
-    "mapName": "Google MAP API",
+    "_id":"place_id, the private key and a unique indentifier for a place",
+    "mapID":"received from the Google MAP API, a unique indentifier for a place", 
+    "mapName": "received from the Google MAP API, the name of the place (may be different from the search text)",
     "geometry": {
-      "lat": "latitude",
-      "lng": "longitude"
+      "lat": "latitude of the place",
+      "lng": "longitude of the place"
     },
-    "flag": "bool",
+    "flag": "bool, true means this place has Covid-19 cases recently, false means this place doesn't have Covid-19 cases recently （e.g. in last 28 days)",
     "cases": [
       {
-          "case_id": "case_id"
+          "case_id": "case_id, a foreign key to the table cases"
       }
     ],
-    "status": "Google MAP API",
-    "types": ["Place Types"]
+    "status": "received from Google MAP API, OK means no errors occurred, ZERO_RESULTS means no places be returned",
+    "types": ["Place Types received from Google MAP API"]
 }    
 ```
-Case
+cases
 ```json
 {
-     "case_id": "Case Number",
+     "_id": " the private key and a unique indentifier for a case",
+     "case_id": "case id from the original dataset (download from hk gov), a unique and contentious indentifier for a case",
      "place_and_date": [{
-          "place": "Place",
-          "start_date": "Start date",
-          "end_date": "End date"
+          "place": "place_id, a foreign key to the table place",
+          "start_date": "Start date from the original dataset (download from hk gov)",
+          "end_date": "End date from the original dataset (download from hk gov)"
       }]
 }
 ```
