@@ -764,6 +764,20 @@
 
             menuBox.style.display = "none";
         })
+        $("#btn_fav" + i).dblclick(function(event) {
+
+            console.log("dbclikd");
+            event.preventDefault(); // prevents page reloading
+            console.log(temp);
+
+            $("a").remove("#btn_fav" + i);
+
+            // TODO: remove item from database
+
+            menuBox.style.display = "none";
+
+        })
+        
 
 
         var uluru = loc;
@@ -811,6 +825,19 @@
             attachSecretMessage(marker, name + "<br>" + time, data["_id"]);
 
             menuBox.style.display = "none";
+        })
+        $("#btn_vis" + i).dblclick(function(event) {
+
+            console.log("dbclikd");
+            event.preventDefault(); // prevents page reloading
+            console.log(temp);
+
+            $("a").remove("#btn_vis" + i);
+
+            // TODO: remove item from database
+
+            menuBox.style.display = "none";
+
         })
 
 
