@@ -377,6 +377,7 @@
             var temp_msg = {
                 "id": data["_id"],
                 "type": 4,
+                "date": time,
             };
             socket.emit('deletePlace', temp_msg);
 
@@ -853,6 +854,7 @@
             var temp_msg = {
                 "id": data["_id"],
                 "type": 4,
+                "date": time,
             };
             socket.emit('deletePlace', temp_msg);
 
