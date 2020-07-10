@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 // const mongoose = require('mongoose').set('debug', true);
 require('mongoose-double')(mongoose);
-
+const email = require('./send_email');
 const https = require('https');
 const qs = require('qs');
 const key = require('./key');
@@ -302,6 +302,18 @@ async function setPlace(userID,placeID,type,date=null){
     });
 }
 
+//type is 3 or 4
+async function deletePlace(userID,placeID,type,date=null){
+    if(type===3){
+        const res = await User.updateOne({_id:userID},{$pull:{fav_places:{fav_place:{$in:placeID}}}},null);
+        console.log(res);
+    }
+    if(type===4){
+        const res = await User.updateOne({_id:userID},{$pull:{vis_places:{$and:[{vis_place:{$in:placeID}},{vis_date:{$in:date}}]}}},null);
+        console.log(res);
+    }
+}
+
 async function findPlaceType(type){
     return new Promise(async (resolve,reject) =>{
         await Place.find({types:type},(err,docs)=>{
@@ -365,7 +377,7 @@ async function addCase(new_case){
         });
     });
 }
-//if flag = true: add date check
+//Todo: if flag is true (add date check)
 async function findCaseByGeo1(geo,flag){
     let lat = geo["lat"];
     let lng = geo["lng"];
@@ -425,22 +437,28 @@ async function findCaseByGeo(geo,flag){
     });
 }
 
+// check place and send emails
 async function checkPlace(){
     for await (const user of User.find()) {
         let email_res = {};
         console.log(email_res);
-        const email = user["contact_email"];
+        email_res["email"] = user["contact_email"];
 
         // Check Home
         const home = await getPlaceByID(user["home"]);
-        email_res["home"] = home["mapName"];
-        email_res["home_case"] = await findCaseByGeo(home["geometry"],false);
+        console.log("home is: ",home);
+        if(home !== null){
+            email_res["home"] = home["mapName"];
+            email_res["home_case"] = await findCaseByGeo(home["geometry"],false);
+        }
 
         //Check Work
         const work = await getPlaceByID(user["work"]);
-        email_res["work"] = work["mapName"];
-        email_res["work_case"] = await findCaseByGeo(work["geometry"],false);
-
+        console.log("work is: ",work);
+        if(work!== null) {
+            email_res["work"] = work["mapName"];
+            email_res["work_case"] = await findCaseByGeo(work["geometry"], false);
+        }
         //Check email
         email_res["fav_places"] = {}
         // user["fav_places"].forEach((item)=>{
@@ -466,7 +484,7 @@ async function checkPlace(){
             // email_res["vis_places"][place]["flag"] = fav["flag"];
             // email_res["vis_places"][place]["cases"] = fav["cases"];
         }
-        console.log(email_res);
+        email.emailSending(email_res);
     }
 }
 
@@ -512,3 +530,4 @@ exports.getCaseByID = getCaseByID;
 
 //settings
 exports.setEmail = setEmail;
+exports.deletePlace = deletePlace;

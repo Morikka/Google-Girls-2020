@@ -124,11 +124,12 @@ io.on('connection', (socket) => {
     //set place
     socket.on('deletePlace',async (msg) =>{
         console.log(msg);
-        await deletePlace(msg);
+        db.deletePlace(userID,msg["id"],msg["type"],msg["date"]);
     });
 });
 
 app.get('/api/update_data', (req,res)=>{
+    db.checkPlace();
     update_data.auto_run();
     res.sendStatus(200);
 });

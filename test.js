@@ -1,4 +1,6 @@
 const db = require('./db');
+const t= require('./email_test');
+const email = require('./send_email');
 
 // db.textSearch("wellcome");
 
@@ -52,18 +54,18 @@ function test3(){
 
 // test3();
 
-// async function test4(){
-//     await db.checkPlace();
-// }
-//
-// test4();
-
-async function test5(){
-    // db.searchNearby("5f05be3723a204a79ea85803",1).then(x=>console.log(x));
-    db.searchNearby("5f05ca2495e518aec24af03f",1).then(x=>console.log(x));
+async function test4(){
+    await db.checkPlace();
 }
 
-test5();
+test4();
+
+// async function test5(){
+//     // db.searchNearby("5f05be3723a204a79ea85803",1).then(x=>console.log(x));
+//     db.searchNearby("5f05ca2495e518aec24af03f",1).then(x=>console.log(x));
+// }
+
+// test5();
 
 // function test6(){
 //     var retries = 3;
@@ -73,3 +75,15 @@ test5();
 // }
 //
 // test6();
+
+// async function test7(){
+//     db.deletePlace("5f060135be3030be8866f58b","5ef02ab03894fab970fcfc84",4,"2020-07-08");
+// }
+//
+// test7();
+
+// function test8(){
+//     email.emailSending(t);
+// }
+//
+// test8();

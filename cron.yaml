@@ -1,5 +1,5 @@
 cron:
-  - description: "Get Data from Government Website"
+  - description: "Send Notification Email"
     url: /api/update_data
     schedule: every 24 hours
     target: service1
