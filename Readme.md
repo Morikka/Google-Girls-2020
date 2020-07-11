@@ -82,3 +82,7 @@ cases
       }]
 }
 ```
+
+# Dataset
+
+The dataset is from !['covid19.vote4.hk - COVID-19 in HK'](https://wars.vote4.hk/en/about-us).
