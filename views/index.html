@@ -16,8 +16,6 @@
 <!-- Custom styles for this template-->
 <link href="vendor/sb-admin/css/sb-admin-2.min.css" rel="stylesheet">
 
-<!--    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>-->
-
 <script src="vendor/jquery/jquery.min.js"></script>
 <!-- Core plugin JavaScript-->
 <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
@@ -67,7 +65,7 @@
         <!-- Nav Item - Pages Collapse Menu -->
         <li class="nav-item">
             <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
-                <i class="fas fa-fw fa-cog"></i>
+                <i class="fas fa-home"></i>
                 <span>Frequent Places</span>
             </a>
             <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
@@ -80,7 +78,7 @@
 
         <li class="nav-item">
             <a id="btn_fav" class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsefavorite" aria-expanded="true" aria-controls="collapseUtilities">
-                <i class="fas fa-fw fa-cog"></i>
+                <i class="fas fa-star"></i>
                 <span>Favorite Places</span>
             </a>
             <div id="collapsefavorite" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
@@ -93,14 +91,11 @@
         <!-- Nav Item - Utilities Collapse Menu -->
         <li class="nav-item">
             <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities" aria-expanded="true" aria-controls="collapseUtilities">
-                <i class="fas fa-fw fa-wrench"></i>
+                <i class="fas fa-umbrella-beach"></i>
                 <span>One-time Places</span>
             </a>
             <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
                 <div class="bg-white py-2 collapse-inner rounded", id="uservis">
-
-                    <!--                    <a class="collapse-item" href="#">IKEA (Kowloon Bay)</a>-->
-                    <!--                    <a class="collapse-item" href="#">Science Park</a>-->
                 </div>
             </div>
         </li>
@@ -122,6 +117,72 @@
             </a>
         </li>
 
+        <hr class="sidebar-divider">
+
+        <!-- Nav Item - Pages Collapse Menu -->
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="#" id="btn_faq">
+                <i class="fas fa-question-circle"></i>
+                <span data-toggle="modal" data-target="#myModal">FAQ</span>
+<!--                <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">FAQ</button>-->
+            </a>
+        </li>
+
+        <!-- Modal -->
+        <div class="modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog">
+
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title text-left">FAQ</h4>
+<!--                        <button type="button" class="close" data-dismiss="modal">&times;</button>-->
+                    </div>
+                    <div class="modal-body">
+                        <h4 class="code-line" data-line-start=0 data-line-end=1 ><a id="Search_place_0"></a>Search place</h4>
+                        <ol>
+                            <li class="has-line-data" data-line-start="1" data-line-end="2">type the place name</li>
+                            <li class="has-line-data" data-line-start="2" data-line-end="4">click the search button</li>
+                        </ol>
+                        <br>
+                        <h4 class="code-line" data-line-start=4 data-line-end=5 ><a id="Set_place_4"></a>Set place</h4>
+                        <ol>
+                            <li class="has-line-data" data-line-start="5" data-line-end="6">search the address to get the location</li>
+                            <li class="has-line-data" data-line-start="6" data-line-end="7">right click the location on the map</li>
+                            <li class="has-line-data" data-line-start="7" data-line-end="9">select from the drop-down menu</li>
+                        </ol>
+                        <br>
+                        <h4 class="code-line" data-line-start=9 data-line-end=10 ><a id="Show_place_9"></a>Show place</h4>
+                        <ol>
+                            <li class="has-line-data" data-line-start="10" data-line-end="12">left click the left navigation bar</li>
+                        </ol>
+                        <br>
+                        <h4 class="code-line" data-line-start=12 data-line-end=13 ><a id="Delete_place_12"></a>Delete place</h4>
+                        <ol>
+                            <li class="has-line-data" data-line-start="14" data-line-end="15">select the corresponding address in the left menu</li>
+                            <li class="has-line-data" data-line-start="15" data-line-end="17">double click the place name</li>
+                        </ol>
+                        <br>
+                        <h4 class="code-line" data-line-start=17 data-line-end=18 ><a id="Check_cases_Nearby_17"></a>Check cases Nearby</h4>
+                        <ol>
+                            <li class="has-line-data" data-line-start="19" data-line-end="20">search the address to get the location</li>
+                            <li class="has-line-data" data-line-start="20" data-line-end="22">left click the location on the map</li>
+                        </ol>
+                        <br>
+                        <h4 class="code-line" data-line-start=22 data-line-end=23 ><a id="Set_email_22"></a>Set email</h4>
+                        <ol>
+                            <li class="has-line-data" data-line-start="23" data-line-end="24">choose "Email"</li>
+                            <li class="has-line-data" data-line-start="24" data-line-end="25">input your contact email</li>
+                        </ol>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
         <!-- Divider -->
         <hr class="sidebar-divider d-none d-md-block">
 
@@ -140,7 +201,6 @@
 
             <!-- Topbar -->
             <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-
                 <!-- Sidebar Toggle (Topbar) -->
                 <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
                     <i class="fa fa-bars"></i>
@@ -160,7 +220,6 @@
 
                 <!-- Topbar Navbar -->
                 <ul class="navbar-nav ml-auto">
-
                     <!-- Nav Item - Search Dropdown (Visible Only XS) -->
                     <li class="nav-item dropdown no-arrow d-sm-none">
                         <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -180,43 +239,14 @@
                             </form>
                         </div>
                     </li>
-
-                    <!-- Nav Item - User Information -->
-                    <li class="nav-item dropdown no-arrow">
-                        <!--                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
-                        <!--                            <span class="mr-2 d-none d-lg-inline text-gray-600 small">Valerie Luna</span>-->
-                        <!--                            <img class="img-profile rounded-circle" src="https://source.unsplash.com/QAB-WJcbgJk/60x60">-->
-                        <!--                        </a>-->
-                        <!-- Dropdown - User Information -->
-                        <!--                        <div class="dropdown-menu dropdown-menu-right shadow animated&#45;&#45;grow-in" aria-labelledby="userDropdown">-->
-                        <!--                            <a class="dropdown-item" href="#">-->
-                        <!--                                <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>-->
-                        <!--                                Profile-->
-                        <!--                            </a>-->
-                        <!--                            <a class="dropdown-item" href="#">-->
-                        <!--                                <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>-->
-                        <!--                                Settings-->
-                        <!--                            </a>-->
-                        <!--                            <a class="dropdown-item" href="#">-->
-                        <!--                                <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>-->
-                        <!--                                Activity Log-->
-                        <!--                            </a>-->
-                        <!--                            <div class="dropdown-divider"></div>-->
-                        <!--                            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">-->
-                        <!--                                <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>-->
-                        <!--                                Logout-->
-                        <!--                            </a>-->
-                        <!--                        </div>-->
-                    </li>
-
                 </ul>
-
             </nav>
             <!-- End of Topbar -->
 
             <!--             Begin Page Content -->
             <div class="container-fluid" id="map-container">
                 <div id="map"></div>
+
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" id="menu">
                     <div class="menu-item">
                         <!--                        <i class="glyphicon glyphicon-file"></i>-->
@@ -227,7 +257,6 @@
                     </div>
                 </div>
             </div>
-            <!--             /.container-fluid -->
 
         </div>
 
@@ -240,39 +269,12 @@
             </div>
         </footer>
         <!-- End of Footer -->
-
     </div>
     <!-- End of Content Wrapper -->
-
-</div>
-<div class="contextMenu">
-    <ul>
-        <li id="zoomIn"><a href="#zoomIn">Zoom In</a></li>
-        <li id="zoomOut"><a href="#zoomOut">Zoom Out</a></li>
-        <li class="separator"><div></div></li>
-        <li id="centerHere"><a href="#centerHere">Center Here</a></li>
-    </ul>
 </div>
 <!-- End of Page Wrapper -->
-<style type="text/css">
-    #map_canvas{
-        width: 400px;
-        height: 300px;
-    }
-    .contextmenu{
-        visibility:hidden;
-        background:#ffffff;
-        border:1px solid #8888FF;
-        z-index: 10;
-        position: relative;
-        width: 140px;
-    }
-    .contextmenu div{
-        padding-left: 5px
-    }
-</style>
 
-<div class="formDiv" id="map_canvas"></div>
+<!--<div class="formDiv" id="map_canvas"></div>-->
 <!-- Scroll to Top Button-->
 <a class="scroll-to-top rounded" href="#page-top">
     <i class="fas fa-angle-up"></i>
@@ -373,20 +375,15 @@
 
             $("a").remove("#btn_vis" + i);
 
-            // TODO: remove item from database
             var temp_msg = {
                 "id": data["_id"],
                 "type": 4,
                 "date": time,
             };
             socket.emit('deletePlace', temp_msg);
-
             menuBox.style.display = "none";
-
         })
-
     });
-
 
     function add_fav(){
         for(var i = 0, len = fav_locs.length; i < len; i++){
@@ -443,11 +440,12 @@
         })
     });
 
-    function arrayRemove(arr, value) {
-        return arr.filter(function(ele){
-            return ele != value;
-        });
-    }
+    // Todo: Useless?
+    // function arrayRemove(arr, value) {
+    //     return arr.filter(function(ele){
+    //         return ele != value;
+    //     });
+    // }
 
     $("#btn_home").click(function(event) {
         event.preventDefault(); // prevents page reloading
@@ -475,27 +473,6 @@
         return false;
     });
 
-    $("#btn_email").click(function(event) {
-        event.preventDefault(); // prevents page reloading
-        console.log("btn_email");
-
-        if(email_ad){
-            console.log(email_ad);
-            email_ad = window.prompt("Input your email address here:", email_ad);
-            console.log(email_ad);
-
-        } else {
-            email_ad = window.prompt("Input your email address here:","abc@cityu.edu.hk");
-            console.log(email_ad);
-        }
-        socket.emit('setEmail', email_ad);
-        {
-            menuBox.style.display = "none";
-        }
-        return false;
-    });
-
-
     $("#btn_work").click(function(event) {
         event.preventDefault(); // prevents page reloading
         console.log("btn_work");
@@ -520,9 +497,29 @@
         return false;
     });
 
+    $("#btn_email").click(function(event) {
+        event.preventDefault(); // prevents page reloading
+        console.log("btn_email");
+
+        if(email_ad){
+            console.log(email_ad);
+            email_ad = window.prompt("Input your email address here:", email_ad);
+            console.log(email_ad);
+
+        } else {
+            email_ad = window.prompt("Input your email address here:","abc@cityu.edu.hk");
+            console.log(email_ad);
+        }
+        socket.emit('setEmail', email_ad);
+        {
+            menuBox.style.display = "none";
+        }
+        return false;
+    });
+
     socket.on('searchRes',(data)=>{
-        //console.log(data);
-        if(data[0]["status"] === 'OK') {
+        console.log(data);
+        if(data !== null && data !== 'None' && data[0]["status"] === 'OK') {
             var locations = [];
             mapNames = [];
             var loc_ids = [];
@@ -558,8 +555,10 @@
 
             var menuDisplayed = false;
             var menuBox = null;
+            var range_slider = $("#map");
 
-            window.addEventListener("contextmenu", function() {
+            range_slider.addEventListener("contextmenu", function() {
+                if (this.value > 0){
                 var left = arguments[0].clientX;
                 var top = arguments[0].clientY;
 
@@ -571,6 +570,7 @@
                 arguments[0].preventDefault();
 
                 menuDisplayed = true;
+                }
             }, false);
 
             //TODO: add marker on map, maybe use later
@@ -588,13 +588,13 @@
         }
     });
 
-    function placeMarkerAndPanTo(latLng, map) {
-        var marker = new google.maps.Marker({
-            position: latLng,
-            map: map
-        });
-        map.panTo(latLng);
-    }
+    // function placeMarkerAndPanTo(latLng, map) {
+    //     var marker = new google.maps.Marker({
+    //         position: latLng,
+    //         map: map
+    //     });
+    //     map.panTo(latLng);
+    // }
 
     var temp_place = [];
 
@@ -613,6 +613,7 @@
             socket.emit('searchNearby', temp);
 
         });
+
         marker.addListener('rightclick', function(e) {
             console.log('Right click triggered');
             // console.log(secretMessage);
@@ -644,8 +645,6 @@
                     menuDisplayed = true;
                 }
             }
-
-
         });
     }
     var markers = []
@@ -655,7 +654,7 @@
             addMarkerWithTimeout(neighborhoods[i], i * 200);
         }
     }
-    
+
     function clearMarkers() {
         for (var i = 0; i < markers.length; i++) {
             markers[i].setMap(null);
@@ -695,8 +694,6 @@
                 }
             }
             drop(locations);
-
-
         } else {
             alert("No cases in the last 7 days.");
         }
@@ -793,7 +790,7 @@
             menuBox.style.display = "none";
 
         })
-        
+
 
 
         var uluru = loc;
@@ -889,12 +886,12 @@
     });
 
 
-    function change_location(){
-        var uluru = {lat: -25.344, lng: 131.036};
-        map = new google.maps.Map(
-            document.getElementById('map'), {zoom: 4, center: uluru});
-        var marker = new google.maps.Marker({position: uluru, map: map});
-    }
+    // function change_location(){
+    //     var uluru = {lat: -25.344, lng: 131.036};
+    //     map = new google.maps.Map(
+    //         document.getElementById('map'), {zoom: 4, center: uluru});
+    //     var marker = new google.maps.Marker({position: uluru, map: map});
+    // }
 
     </script>
 
