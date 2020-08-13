@@ -83,7 +83,6 @@
             </a>
             <div id="collapsefavorite" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
                 <div id="userfav" class="bg-white py-2 collapse-inner rounded">
-                    <!--                    <a class="collapse-item" href="#">IKEA (Kowloon Bay)</a>-->
                 </div>
             </div>
         </li>
@@ -139,47 +138,46 @@
 <!--                        <button type="button" class="close" data-dismiss="modal">&times;</button>-->
                     </div>
                     <div class="modal-body">
-                        <h4 class="code-line" data-line-start=0 data-line-end=1 ><a id="Search_place_0"></a>Search place</h4>
+                        <h4>Search place</h4>
                         <ol>
-                            <li class="has-line-data" data-line-start="1" data-line-end="2">type the place name</li>
-                            <li class="has-line-data" data-line-start="2" data-line-end="4">click the search button</li>
+                            <li>type the place name</li>
+                            <li>click the search button</li>
                         </ol>
                         <br>
-                        <h4 class="code-line" data-line-start=4 data-line-end=5 ><a id="Set_place_4"></a>Set place</h4>
+                        <h4>Set place</h4>
                         <ol>
-                            <li class="has-line-data" data-line-start="5" data-line-end="6">search the address to get the location</li>
-                            <li class="has-line-data" data-line-start="6" data-line-end="7">right click the location on the map</li>
-                            <li class="has-line-data" data-line-start="7" data-line-end="9">select from the drop-down menu</li>
+                            <li>search the address to get the location</li>
+                            <li>right click the location on the map</li>
+                            <li>select from the drop-down menu</li>
                         </ol>
                         <br>
-                        <h4 class="code-line" data-line-start=9 data-line-end=10 ><a id="Show_place_9"></a>Show place</h4>
+                        <h4>Show place</h4>
                         <ol>
-                            <li class="has-line-data" data-line-start="10" data-line-end="12">left click the left navigation bar</li>
+                            <li>left click the left navigation bar</li>
                         </ol>
                         <br>
-                        <h4 class="code-line" data-line-start=12 data-line-end=13 ><a id="Delete_place_12"></a>Delete place</h4>
+                        <h4>Delete place</h4>
                         <ol>
-                            <li class="has-line-data" data-line-start="14" data-line-end="15">select the corresponding address in the left menu</li>
-                            <li class="has-line-data" data-line-start="15" data-line-end="17">double click the place name</li>
+                            <li>select the corresponding address in the left menu</li>
+                            <li>double click the place name</li>
                         </ol>
                         <br>
-                        <h4 class="code-line" data-line-start=17 data-line-end=18 ><a id="Check_cases_Nearby_17"></a>Check cases Nearby</h4>
+                        <h4>Check nearby cases</h4>
                         <ol>
-                            <li class="has-line-data" data-line-start="19" data-line-end="20">search the address to get the location</li>
-                            <li class="has-line-data" data-line-start="20" data-line-end="22">left click the location on the map</li>
+                            <li>search the address to get the location</li>
+                            <li>left click the location on the map</li>
                         </ol>
                         <br>
-                        <h4 class="code-line" data-line-start=22 data-line-end=23 ><a id="Set_email_22"></a>Set email</h4>
+                        <h4>Set email</h4>
                         <ol>
-                            <li class="has-line-data" data-line-start="23" data-line-end="24">choose "Email"</li>
-                            <li class="has-line-data" data-line-start="24" data-line-end="25">input your contact email</li>
+                            <li>choose "Email"</li>
+                            <li>input your contact email</li>
                         </ol>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     </div>
                 </div>
-
             </div>
         </div>
 
@@ -300,6 +298,7 @@
 
     var user_id;
     var email_ad;
+    var email_con; //The contact email
     var home_loc;
     var work_loc;
     var fav_locs = [];
@@ -311,17 +310,19 @@
     var vis_list = [];
 
     socket.on('user',(data)=>{
+        if(data=== undefined || data === null ){
+            alert("Cannot connect to the server, please refresh the page and try again.");
+        }
         console.log(data);
         user_id = data["_id"];
         email_ad = data["email"];
+        email_con = data["contact_email"];
         home_loc = data["home"];
         work_loc = data["work"];
         fav_locs = data["fav_places"];
         vis_locs = data["vis_places"];
         add_fav();
         add_vis();
-        // console.log(work_loc);
-        // console.log(fav_locs);
         console.log(vis_locs);
     });
 
@@ -333,15 +334,11 @@
             // console.log(vis_locs[i]["vis_date"])
             socket.emit('getPlaceByID2',vis_locs[i]["vis_place"]);
         }
-        // $("#uservis").append("<a class=\"collapse-item\" href=\"#\">TestTestTestTestTestTest<br>TestTestTestTestTestTestTestTestv</a>");
-
     }
 
     socket.on('getPlaceByIDRes2',(data)=>{
         var name = data["mapName"];
         var loc = data["geometry"];
-        // console.log(name);
-        // console.log(loc);
         vis_locs_add.push(loc);
         var i  = vis_list.length;
         var time = vis_time[i].slice(0, 10);
@@ -369,7 +366,7 @@
         })
         $("#btn_vis" + i).dblclick(function(event) {
 
-            console.log("dbclikd");
+            console.log("dblclick");
             event.preventDefault(); // prevents page reloading
             console.log(temp);
 
@@ -387,8 +384,6 @@
 
     function add_fav(){
         for(var i = 0, len = fav_locs.length; i < len; i++){
-            // console.log("test");
-            // console.log(i);
             socket.emit('getPlaceByID',fav_locs[i]["fav_place"]);
         }
     }
@@ -428,7 +423,6 @@
 
             $("a").remove("#btn_fav" + i);
 
-            // TODO: remove item from database
             var temp_msg = {
                 "id": data["_id"],
                 "type": 3,
@@ -439,13 +433,6 @@
 
         })
     });
-
-    // Todo: Useless?
-    // function arrayRemove(arr, value) {
-    //     return arr.filter(function(ele){
-    //         return ele != value;
-    //     });
-    // }
 
     $("#btn_home").click(function(event) {
         event.preventDefault(); // prevents page reloading
@@ -500,26 +487,32 @@
     $("#btn_email").click(function(event) {
         event.preventDefault(); // prevents page reloading
         console.log("btn_email");
-
-        if(email_ad){
-            console.log(email_ad);
-            email_ad = window.prompt("Input your email address here:", email_ad);
-            console.log(email_ad);
-
+        let tmp_email_con = null;
+        if(email_con){
+            tmp_email_con = window.prompt("Input your email address here:", email_con);
         } else {
-            email_ad = window.prompt("Input your email address here:","abc@cityu.edu.hk");
-            console.log(email_ad);
+            tmp_email_con = window.prompt("Input your email address here:", );
         }
-        socket.emit('setEmail', email_ad);
-        {
-            menuBox.style.display = "none";
+        if(tmp_email_con!=null){
+            email_con = tmp_email_con;
+            socket.emit('setEmail', email_con);
         }
+        if(menuBox) menuBox.style.display = "none";
         return false;
     });
 
     socket.on('searchRes',(data)=>{
         console.log(data);
-        if(data !== null && data !== 'None' && data[0]["status"] === 'OK') {
+        let flag = false;
+        if (data === null || data === undefined){
+            flag = true;
+            alert("The server cannot find the place, please try again.");
+        }
+        if(!flag && data[0]["status"] === 'ZERO_RESULTS'){
+            flag = true;
+            alert("The server cannot find the place, please change the keyword and try again.");
+        }
+        if(!flag && data[0]["status"] === 'OK') {
             var locations = [];
             mapNames = [];
             var loc_ids = [];
@@ -582,19 +575,8 @@
             //     }
             // });
 
-
-        } else {
-            alert("No such place!");
-        }
+        };
     });
-
-    // function placeMarkerAndPanTo(latLng, map) {
-    //     var marker = new google.maps.Marker({
-    //         position: latLng,
-    //         map: map
-    //     });
-    //     map.panTo(latLng);
-    // }
 
     var temp_place = [];
 
@@ -698,7 +680,6 @@
             alert("No cases in the last 7 days.");
         }
     });
-
 
     $("#set_home").click(function(event) {
         event.preventDefault(); // prevents page reloading
@@ -847,7 +828,6 @@
 
             $("a").remove("#btn_vis" + i);
 
-            // TODO: remove item from database
             var temp_msg = {
                 "id": data["_id"],
                 "type": 4,
@@ -880,18 +860,9 @@
         return false;
     });
 
-
     socket.on("setPlaceRes",(tem_msg)=>{
         console.log(tem_msg);
     });
-
-
-    // function change_location(){
-    //     var uluru = {lat: -25.344, lng: 131.036};
-    //     map = new google.maps.Map(
-    //         document.getElementById('map'), {zoom: 4, center: uluru});
-    //     var marker = new google.maps.Marker({position: uluru, map: map});
-    // }
 
     </script>
 

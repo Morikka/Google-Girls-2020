@@ -70,7 +70,7 @@ Create a cron job `/api/update_data` from google app engine to automatically sen
     "types": ["Place Types received from Google MAP API"]
 }    
 ```
-cases
++ cases
 ```json
 {
      "_id": " the private key and a unique indentifier for a case",
