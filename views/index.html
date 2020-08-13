@@ -308,6 +308,7 @@
     var vis_locs_add = [];
     var fav_list = [];
     var vis_list = [];
+    var menuBox = null;
 
     socket.on('user',(data)=>{
         if(data=== undefined || data === null ){
@@ -332,13 +333,14 @@
             // console.log("add vis");
             vis_time.push(vis_locs[i]["vis_date"]);
             // console.log(vis_locs[i]["vis_date"])
-            socket.emit('getPlaceByID2',vis_locs[i]["vis_place"]);
+            socket.emit('getPlaceByID',{place:vis_locs[i]["vis_place"],type:"vis"});
         }
     }
 
-    socket.on('getPlaceByIDRes2',(data)=>{
-        var name = data["mapName"];
-        var loc = data["geometry"];
+    socket.on('getPlaceByIDRes',(data)=>{
+        if(data["type"] === "vis"){
+        var name = data["res"]["mapName"];
+        var loc = data["res"]["geometry"];
         vis_locs_add.push(loc);
         var i  = vis_list.length;
         var time = vis_time[i].slice(0, 10);
@@ -359,13 +361,10 @@
             map = new google.maps.Map(
                 document.getElementById('map'), {zoom: 15, center: uluru});
             var marker = new google.maps.Marker({position: uluru, map: map});
-            attachSecretMessage(marker, name+"<br>"+time, data["_id"]);
-            {
-                menuBox.style.display = "none";
-            }
+            attachSecretMessage(marker, name+"<br>"+time, data["res"]["_id"]);
+            if(menuBox!==null) menuBox.style.display = "none";
         })
         $("#btn_vis" + i).dblclick(function(event) {
-
             console.log("dblclick");
             event.preventDefault(); // prevents page reloading
             console.log(temp);
@@ -373,25 +372,27 @@
             $("a").remove("#btn_vis" + i);
 
             var temp_msg = {
-                "id": data["_id"],
+                "id": data["res"]["_id"],
                 "type": 4,
                 "date": time,
             };
             socket.emit('deletePlace', temp_msg);
-            menuBox.style.display = "none";
+            if(menuBox) menuBox.style.display = "none";
         })
+
+        }
     });
 
     function add_fav(){
         for(var i = 0, len = fav_locs.length; i < len; i++){
-            socket.emit('getPlaceByID',fav_locs[i]["fav_place"]);
+            socket.emit('getPlaceByID',{place:fav_locs[i]["fav_place"],type:"fav"});
         }
     }
 
     socket.on('getPlaceByIDRes',(data)=>{
-        //console.log(data);
-        var name = data["mapName"];
-        var loc = data["geometry"];
+        if(data["type"] === "fav"){
+        var name = data["res"]["mapName"];
+        var loc = data["res"]["geometry"];
         // console.log(name);
         // console.log(loc);
         fav_locs_add.push(loc);
@@ -410,9 +411,10 @@
             map = new google.maps.Map(
                 document.getElementById('map'), {zoom: 15, center: uluru});
             var marker = new google.maps.Marker({position: uluru, map: map});
-            attachSecretMessage(marker, name, data["_id"]);
+            console.log(data);
+            attachSecretMessage(marker, name, data["res"]["_id"]);
 
-            menuBox.style.display = "none";
+            if(menuBox!==null) menuBox.style.display = "none";
 
         })
         $("#btn_fav" + i).dblclick(function(event) {
@@ -424,14 +426,15 @@
             $("a").remove("#btn_fav" + i);
 
             var temp_msg = {
-                "id": data["_id"],
+                "id": data["res"]["_id"],
                 "type": 3,
             };
             socket.emit('deletePlace', temp_msg);
 
-            menuBox.style.display = "none";
+            if(menuBox!==null) menuBox.style.display = "none";
 
         })
+        }
     });
 
     $("#btn_home").click(function(event) {
@@ -440,23 +443,22 @@
 
         if(home_loc){
             // console.log(home_loc);
-            socket.emit('getPlaceByID',home_loc);
+            socket.emit('getPlaceByID',{place:home_loc,type:"home"});
             socket.on('getPlaceByIDRes',(data)=>{
-                // console.log(data);
-                var loc = data["geometry"];
-                var uluru = loc;
-                map = new google.maps.Map(
-                    document.getElementById('map'), {zoom: 15, center: uluru});
-                var marker = new google.maps.Marker({position: uluru, map: map});
-                attachSecretMessage(marker, "Home", data["_id"]);
-
+                if(data["type"] === "home") {
+                    // console.log(data);
+                    var loc = data["res"]["geometry"];
+                    var uluru = loc;
+                    map = new google.maps.Map(
+                        document.getElementById('map'), {zoom: 15, center: uluru});
+                    var marker = new google.maps.Marker({position: uluru, map: map});
+                    attachSecretMessage(marker, "Home", data["res"]["_id"]);
+                }
             });
         } else {
             alert("You should set your home address first.");
         }
-        {
-            menuBox.style.display = "none";
-        }
+        if(menuBox!==null) menuBox.style.display = "none";
         return false;
     });
 
@@ -464,23 +466,21 @@
         event.preventDefault(); // prevents page reloading
         console.log("btn_work");
         if(work_loc){
-            console.log(work_loc);
-            socket.emit('getPlaceByID',work_loc);
+            socket.emit('getPlaceByID',{place:work_loc,type:"work"});
             socket.on('getPlaceByIDRes',(data)=>{
-                console.log(data);
-                var loc = data["geometry"];
+                if(data["type"] === "work"){
+                var loc = data["res"]["geometry"];
                 var uluru = loc;
                 map = new google.maps.Map(
                     document.getElementById('map'), {zoom: 15, center: uluru});
                 var marker = new google.maps.Marker({position: uluru, map: map});
                 attachSecretMessage(marker, "Work", data["_id"]);
+                }
             });
         } else {
             alert("You should set your work address first.");
         }
-        {
-            menuBox.style.display = "none";
-        }
+        if(menuBox!==null) menuBox.style.display = "none";
         return false;
     });
 
@@ -497,7 +497,7 @@
             email_con = tmp_email_con;
             socket.emit('setEmail', email_con);
         }
-        if(menuBox) menuBox.style.display = "none";
+        if(menuBox!==null) menuBox.style.display = "none";
         return false;
     });
 
@@ -545,26 +545,24 @@
             var markerCluster = new MarkerClusterer(map, markers,
                 {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
 
-
             var menuDisplayed = false;
-            var menuBox = null;
             var range_slider = $("#map");
 
-            range_slider.addEventListener("contextmenu", function() {
-                if (this.value > 0){
-                var left = arguments[0].clientX;
-                var top = arguments[0].clientY;
-
-                menuBox = document.getElementById("menu");
-                menuBox.style.left = left + "px";
-                menuBox.style.top = top + "px";
-                menuBox.style.display = "block";
-
-                arguments[0].preventDefault();
-
-                menuDisplayed = true;
-                }
-            }, false);
+            // range_slider.addEventListener("contextmenu", function() {
+            //     if (this.value > 0){
+            //     var left = arguments[0].clientX;
+            //     var top = arguments[0].clientY;
+            //
+            //     menuBox = document.getElementById("menu");
+            //     menuBox.style.left = left + "px";
+            //     menuBox.style.top = top + "px";
+            //     menuBox.style.display = "block";
+            //
+            //     arguments[0].preventDefault();
+            //
+            //     menuDisplayed = true;
+            //     }
+            // }, false);
 
             //TODO: add marker on map, maybe use later
             // google.maps.event.addListener(map, "click", function(event) {
@@ -715,7 +713,6 @@
             document.getElementById('map'), {zoom: 15, center: uluru});
         var marker = new google.maps.Marker({position: uluru, map: map});
 
-
         // send the temp_place to database
         var temp_msg = {
             "id": work_loc,
@@ -740,8 +737,6 @@
         // console.log(temp);
         $("#userfav").append(temp);
         $("#btn_fav" + i).click(function(event) {
-            // var id_cm = $(this).attr("id");
-            // iota(id_cm);
             event.preventDefault(); // prevents page reloading
             // console.log("btn_fav" + i);
             var loc = fav_locs_add[i];
@@ -749,9 +744,10 @@
             map = new google.maps.Map(
                 document.getElementById('map'), {zoom: 15, center: uluru});
             var marker = new google.maps.Marker({position: uluru, map: map});
-            attachSecretMessage(marker, name, data["_id"]);
+            console.log(temp_place);
+            attachSecretMessage(marker, name, temp_place["_id"]);
 
-            menuBox.style.display = "none";
+            if(menuBox) menuBox.style.display = "none";
         })
         $("#btn_fav" + i).dblclick(function(event) {
 
@@ -768,11 +764,9 @@
             };
             socket.emit('deletePlace', temp_msg);
 
-            menuBox.style.display = "none";
+            if(menuBox) menuBox.style.display = "none";
 
         })
-
-
 
         var uluru = loc;
         map = new google.maps.Map(
@@ -787,7 +781,7 @@
         };
         socket.emit('setPlace', temp_msg);
 
-        menuBox.style.display = "none";
+        if(menuBox) menuBox.style.display = "none";
 
         return false;
     });
@@ -816,7 +810,7 @@
             map = new google.maps.Map(
                 document.getElementById('map'), {zoom: 15, center: uluru});
             var marker = new google.maps.Marker({position: uluru, map: map});
-            attachSecretMessage(marker, name + "<br>" + time, data["_id"]);
+            attachSecretMessage(marker, name + "<br>" + time, temp_place["_id"]);
 
             menuBox.style.display = "none";
         })
