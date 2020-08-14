@@ -78,6 +78,18 @@ async function test7(){
     let res4 = await db.deletePlace(user["_id"],place[0]["_id"],4,"2020-07-03");
     console.log(res4);
 }
+
+// Test email function
+// async function test8(){
+//     let res = await db.checkPlace();
+//     console.log(res);
+// }
+
+async function test9(){
+    let place = "百佳";
+    db.textSearch(place);
+}
+
 // test1();
 // test2();
 // test3();
@@ -85,3 +97,5 @@ async function test7(){
 // test5();
 // test6();
 // test7();
+// test8();
+test9();

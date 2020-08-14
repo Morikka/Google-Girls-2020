@@ -85,8 +85,8 @@ async function getUser(email){
     });
 }
 
-function setEmail(userID, email){
-    return User.findOneAndUpdate({_id:userID},{"contact_email":email},{new:true}).exec();
+async function setEmail(userID, email){
+    return await User.findOneAndUpdate({_id:userID},{"contact_email":email},{new:true}).exec();
 }
 
 function getPlaceByID(id){
@@ -341,6 +341,7 @@ function addCase(new_case){
         let res = await Case.findOne({"case_id":new_case["case_id"]}).exec();
         if(res === null){
             let newcase = new Case(new_case);
+            console.log(newcase);
             newcaseID = newcase["_id"];
             await newcase.save(err=>{
                 reject(err);
@@ -358,9 +359,11 @@ function addCase(new_case){
         }
         console.log(newcaseID);
         // Update place info
+        let item = {case:newcaseID};
+        console.log(item);
         const pres = await Place.updateOne({_id:place[0]["_id"]},{
             flag:true,
-            $addToSet:{cases:newcaseID}
+            $addToSet:{cases:item}
         });
         console.log("Place updated result: ",pres.n, pres.nModified);
         resolve(true);
@@ -419,61 +422,63 @@ async function findCaseByGeo(geo,flag){
 // send emails
 async function sendEmail(user){
     console.log(user);
-    let email_res = {};
-    console.log(email_res);
-    email_res["email"] = user["contact_email"];
+    if(user["contact_email"]!=null && user["contact_email"]!="null"){
+        let email_res = {};
+        console.log(email_res);
+        email_res["email"] = user["contact_email"];
 
-    // Check Home
-    const home = await getPlaceByID(user["home"]);
-    console.log ("home is: ",home);
-    if(home !== null){
-        email_res["home"] = home["mapName"];
-        email_res["home_case"] = await findCaseByGeo(home["geometry"],false);
-    }
+        // Check Home
+        const home = await getPlaceByID(user["home"]);
+        console.log ("home is: ",home);
+        if(home !== null){
+            email_res["home"] = home["mapName"];
+            email_res["home_case"] = await findCaseByGeo(home["geometry"],false);
+        }
 
-    //Check Work
-    const work = await getPlaceByID(user["work"]);
-    // console.log("work is: ",work);
-    if(work!== null) {
-        email_res["work"] = work["mapName"];
-        email_res["work_case"] = await findCaseByGeo(work["geometry"], false);
-    }
-    //Check Fav
-    email_res["fav_places"] = {}
-    for (const place in user["fav_places"]){
-        const fav = await getPlaceByID(user["fav_places"][place]["fav_place"]);
-        if(fav["flag"]===true){
-            email_res["fav_places"][place] = {};
-            email_res["fav_places"][place]["mapName"] = fav["mapName"];
-            email_res["fav_places"][place]["flag"] = fav["flag"];
-            email_res["fav_places"][place]["cases"] = fav["cases"];
+        //Check Work
+        const work = await getPlaceByID(user["work"]);
+        // console.log("work is: ",work);
+        if(work!== null) {
+            email_res["work"] = work["mapName"];
+            email_res["work_case"] = await findCaseByGeo(work["geometry"], false);
         }
-    }
-    email_res["vis_places"] = {}
-    for (const place in user["vis_places"]){
-        const vis = await getPlaceByID(user["vis_places"][place]["vis_place"]);
-        if(vis["flag"]===true){
-            const p = vis["cases"];
-            const d = user["vis_places"][place]["vis_date"];
-            console.log(p,d);
-            email_res["vis_places"][place] = {};
-            email_res["vis_places"][place]["mapName"] = vis["mapName"];
-            email_res["vis_places"][place]["flag"] = vis["flag"];
-            email_res["vis_places"][place]["cases"] = vis["cases"];
+        //Check Fav
+        email_res["fav_places"] = {}
+        for (const place in user["fav_places"]){
+            const fav = await getPlaceByID(user["fav_places"][place]["fav_place"]);
+            if(fav["flag"]===true){
+                email_res["fav_places"][place] = {};
+                email_res["fav_places"][place]["mapName"] = fav["mapName"];
+                email_res["fav_places"][place]["flag"] = fav["flag"];
+                email_res["fav_places"][place]["cases"] = fav["cases"];
+            }
         }
-    }
-    // console.log(email_res);
-    email.emailSending(email_res);
-    console.log("Email Debug: ");
-    console.log(email_res["email"]);
-    console.log(email_res["home"]);
-    console.log(email_res["home_case"]);
-    if(email_res["home_case"]){
-        for(const items in email_res["home_case"]){
-            console.log(email_res["home_case"][items]);
-            if(email_res["home_case"][items]===null) continue;
-            for(const cases in email_res["home_case"][items]["cases"]){
-               console.log(cases);
+        email_res["vis_places"] = {}
+        for (const place in user["vis_places"]){
+            const vis = await getPlaceByID(user["vis_places"][place]["vis_place"]);
+            if(vis["flag"]===true){
+                const p = vis["cases"];
+                const d = user["vis_places"][place]["vis_date"];
+                console.log(p,d);
+                email_res["vis_places"][place] = {};
+                email_res["vis_places"][place]["mapName"] = vis["mapName"];
+                email_res["vis_places"][place]["flag"] = vis["flag"];
+                email_res["vis_places"][place]["cases"] = vis["cases"];
+            }
+        }
+        // console.log(email_res);
+        email.emailSending(email_res);
+        console.log("Email Debug: ");
+        console.log(email_res["email"]);
+        console.log(email_res["home"]);
+        console.log(email_res["home_case"]);
+        if(email_res["home_case"]){
+            for(const items in email_res["home_case"]){
+                console.log(email_res["home_case"][items]);
+                if(email_res["home_case"][items]===null) continue;
+                for(const cases in email_res["home_case"][items]["cases"]){
+                   console.log(cases);
+                }
             }
         }
     }
@@ -481,7 +486,12 @@ async function sendEmail(user){
 
 // check place and send emails
 async function checkPlace(){
-    for (const user of User.find()) {
+    // for (const user of User.find()) {
+    //     await sendEmail(user);
+    // }
+    const userres = await User.find().exec();
+    console.log(userres);
+    for (const user of userres) {
         await sendEmail(user);
     }
 }

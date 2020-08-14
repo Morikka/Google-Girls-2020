@@ -11,9 +11,6 @@ const myEmitter = emitterFile.emitter;
 const db = require('./db');
 const validate = require('./validate');
 
-// var http = require('http').createServer(app);
-// var io = require('socket.io')(http);
-
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 
@@ -43,17 +40,11 @@ app.get('/', async (req, res) => {
     if (email===undefined){
         email='test@t.t'
     }
-    user = await db.getUser(email);
+    user = await db.getUser(email).catch((error)=>{
+        console.log("Error is",error);
+    });
     userID = user["_id"];
     res.render('index.html');
-});
-
-app.get('/test', async (req,res) =>{
-    email='test@t.t';
-    user = await db.getUser(email);
-    console.log(user);
-    userID = user["_id"];
-    res.render('test.html');
 });
 
 io.on('connection', (socket) => {
@@ -64,17 +55,22 @@ io.on('connection', (socket) => {
         console.log("a user go out");
     });
 
+    //get user Info
+    socket.emit('user',user);
+
     // search the place
     socket.on('search', async (msg) => {
         console.log('user ID: ' + userID);
         console.log('search: ' + msg);
-        await db.findPlace(msg).then(async place =>{
-            if(place[0]==='null'){
-                await db.findPlace(msg).then(place=>{
-                    socket.emit('searchRes', place);
-                }); } else {
-                    socket.emit('searchRes', place);
-                };
+        db.findPlace(msg).then(place =>{
+            // if(place[0]==='null'){
+            //     await db.findPlace(msg).then(place=>{
+            //         socket.emit('searchRes', place);
+            //     }); } else {
+            //         socket.emit('searchRes', place);
+            //     };
+            console.log("The frontpage will get: ",place);
+            socket.emit('searchRes', place);
             }
         )
         console.log("Place is", place);
@@ -82,54 +78,48 @@ io.on('connection', (socket) => {
 
     socket.on('searchNearby',async (msg)=>{
         console.log("searchNearby>>>",msg["PlaceID"],msg["type"]);
-        await db.searchNearby(msg["PlaceID"],msg["type"]).then(
+        db.searchNearby(msg["PlaceID"],msg["type"]).then(
             x=> {
                 console.log(x);
                 socket.emit("searchNearbyRes",x)
             });
     });
 
-    //get user Info
-    socket.emit('user',user);
-
     //set user email
     socket.on("setEmail",async (msg) => {
         console.log(msg);
-        await db.setEmail(userID,msg).then(x=>{
-            socket.emit("setEmailRes",x);
-            }
-        );
-    })
+        await db.setEmail(userID,msg);
+            // .then(x=>{
+            // console.log(">",x);
+            // socket.emit("setEmailRes",x);
+            // }
+            // );
+    });
 
-    //find place by ID
+    //Find place by ID
     socket.on("getPlaceByID",async (msg) => {
-        place = await db.getPlaceByID(msg);
-        console.log("Place is", place);
-        socket.emit('getPlaceByIDRes', place);
-    })
 
-    //find place by ID
-    socket.on("getPlaceByID2",async (msg) => {
-        place = await db.getPlaceByID(msg);
+        place = await db.getPlaceByID(msg.place);
         console.log("Place is", place);
-        socket.emit('getPlaceByIDRes2', place);
+        socket.emit('getPlaceByIDRes', {res:place,type:msg.type});
     })
 
     //set place
     socket.on('setPlace',async (msg) =>{
         console.log(msg);
-        await setPlace(msg);
+        // await setPlace(msg);
+        await db.setPlace(userID,msg["id"],msg["type"],msg["date"]);
     });
 
     //set place
     socket.on('deletePlace',async (msg) =>{
         console.log(msg);
-        db.deletePlace(userID,msg["id"],msg["type"],msg["date"]);
+        await db.deletePlace(userID,msg["id"],msg["type"],msg["date"]);
     });
 });
 
-app.get('/api/update_data', (req,res)=>{
-    db.checkPlace();
+app.get('/api/update_data', async (req,res)=>{
+    await db.checkPlace();
     update_data.auto_run();
     res.sendStatus(200);
 });
@@ -150,16 +140,16 @@ if (module === require.main) {
 }
 // [END appengine_websockets_app]
 
-async function setPlace(msg){
-    var retries = 5;
-    function recurse(i) {
-        db.setPlace(userID,msg["id"],msg["type"],msg["date"]).then(e =>{
-            // console.log("????: ",e,i);
-            if (i < retries && e["n"]!==1) {
-                recurse(++i);
-            }
-            throw e;
-        }).catch(e => console.error(e));
-    }
-    recurse(0);
-}
+// async function setPlace(msg){
+//     var retries = 5;
+//     function recurse(i) {
+//         db.setPlace(userID,msg["id"],msg["type"],msg["date"]).then(e =>{
+//             // console.log("????: ",e,i);
+//             if (i < retries && e["n"]!==1) {
+//                 recurse(++i);
+//             }
+//             throw e;
+//         }).catch(e => console.error(e));
+//     }
+//     recurse(0);
+// }

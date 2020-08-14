@@ -12,7 +12,6 @@ function emailSending(t) {
 
     var emailaddress = json_data.email;
     var home = json_data.home;
-// var home_case = {caseID:80,"start-date":"2020-07-01","end_date":"2020-07-15"};
     var home_case = json_data.home_case;
     var work = json_data.work;
     var work_case = json_data.work_case;
@@ -124,6 +123,12 @@ function emailSending(t) {
       <br>
       <br>
       <div>${vis_notification}</div>
+      <br>
+      <br>
+      <div> If you don't want to receive this kind of emails, please log in https://ggirls.df.r.appspot.com/ and change your email to 'null', thanks! </div>
+      <br>
+      <br>
+      <div>If you have any questions, feel free to contact us googlegirlscovid19@163.com . </div>
     </div>`;
 
     console.log(sendHtml);
