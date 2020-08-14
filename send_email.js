@@ -1,5 +1,6 @@
 function emailSending(t) {
-    var json_data = t.json;
+    var json_data = t;
+    console.log(json_data);
     const nodemailer = require('nodemailer')
     var transporter = nodemailer.createTransport({
         service: '163',
@@ -32,7 +33,7 @@ function emailSending(t) {
             var tmp = "👉" + place_name + "'s case number:" + "😷" + String(Object.keys(home_case[item]["cases"]).length) + "<br>"
             var i = 1;
             for (const items in home_case[item]["cases"]) {
-                // console.log(items)
+                if(home_case[item]["cases"][items]===null) continue;
                 tmp += "&emsp;" + "(" + i + "):" + "Case id is: " + home_case[item]["cases"][items]["caseID"] + ", the start time is: " + home_case[item]["cases"][items]["start_date"] + " the end time is: " + home_case[item]["cases"][items]["end_date"] + "<br>";
                 i += 1
             }
@@ -52,7 +53,7 @@ function emailSending(t) {
             var tmp = "👉" + place_name + "'s case number:" + "😷" + String(Object.keys(work_case[item]["cases"]).length) + "<br>"
             var i = 1;
             for (const items in work_case[item]["cases"]) {
-                // console.log(items)
+                if(work_case[item]["cases"][items]===null) continue;
                 tmp += "&emsp;" + "(" + i + "):" + "Case id is: " + work_case[item]["cases"][items]["caseID"] + ", the start time is: " + work_case[item]["cases"][items]["start_date"] + " the end time is: " + work_case[item]["cases"][items]["end_date"] + "<br>";
                 i += 1;
             }
@@ -74,7 +75,7 @@ function emailSending(t) {
                 var tmp2 = "👉" + place_name + "'s case number:" + "😷" + String(Object.keys(fav[item]["cases"]).length) + "<br>";
                 var i = 1;
                 for (const items in fav[item]["cases"]) {
-                    console.log(items)
+                    if(fav[item]["cases"][items]===null) continue;
                     tmp2 += "&emsp;" + "(" + i + "):" + "Case id is: " + fav[item]["cases"][items]["caseID"] + ", the start time is: " + fav[item]["cases"][items]["start_date"] + " the end time is: " + fav[item]["cases"][items]["end_date"] + "<br>";
                     i += 1;
                 }
@@ -100,7 +101,7 @@ function emailSending(t) {
                 var i = 1;
                 var tmp2 = "👉" + place_name + "'s case number:" + "😷" + String(Object.keys(vis[item]["cases"]).length) + "<br>";
                 for (const items in vis[item]["cases"]) {
-                    console.log(items)
+                    if(vis[item]["cases"][items]===null) continue;
                     tmp2 += "&emsp;" + "(" + i + "):" + "Case id is: " + vis[item]["cases"][items]["caseID"] + ", the start time is: " + vis[item]["cases"][items]["start_date"] + " the end time is: " + vis[item]["cases"][items]["end_date"] + "<br>";
                     i += 1;
                 }
@@ -110,7 +111,6 @@ function emailSending(t) {
             vis_notification += tmp2;
         }
     }
-
 
     console.log(vis_notification);
     var sendHtml = `<div>

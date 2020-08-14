@@ -1,6 +1,9 @@
-const mongoose = require('mongoose');
-// const mongoose = require('mongoose').set('debug', true);
+// const mongoose = require('mongoose');
+const mongoose = require('mongoose').set('debug', true);
 require('mongoose-double')(mongoose);
+// mongoose.Promise = require('bluebird');
+// mongoose.Promise = global.Promise;
+
 const email = require('./send_email');
 const https = require('https');
 const qs = require('qs');
@@ -62,11 +65,11 @@ const Case = mongoose.model('cases',caseSchema)
 mongoose.set('useFindAndModify', false);
 
 async function getUser(email){
-    return new Promise(async (resolve,reject) => {
+    return new Promise((resolve,reject) => {
         let user = new User({email:email,contact_email:email});
         let userID = null;
         // find user
-        await User.findOne({email:email},(err,docs)=>{
+         User.findOne({email:email}).exec((err,docs)=>{
             if(err) reject(err);
             //If user doesn't exist
             if(docs===null || docs.length===0){
@@ -77,43 +80,39 @@ async function getUser(email){
             } else {
                 userID = docs;
             }
-        }).then(()=>{
             resolve(userID);
         });
     });
 }
 
-async function setEmail(userID, email){
-    return new Promise(async (resolve,reject) => {
-        let doc =  await User.findOneAndUpdate({_id:userID},{"contact_email":email});
-        resolve(doc["contact_email"]);
-    });
+function setEmail(userID, email){
+    return User.findOneAndUpdate({_id:userID},{"contact_email":email},{new:true}).exec();
 }
 
-async function getPlaceByID(id){
-    return new Promise(async (resolve,reject) => {
-        await Place.findOne({_id: id}, (err, data) => {
+function getPlaceByID(id){
+    return new Promise( (resolve,reject) => {
+         Place.findOne({_id: id}).exec((err, data) => {
             if (err) reject(err);
             resolve(data);
         });
     });
 }
 
-async function getUserByID(id){
-    return new Promise(async (resolve,reject) => {
-        await User.findOne({_id: id}, (err, data) => {
+function getUserByID(id){
+    return new Promise((resolve,reject) => {
+         User.findOne({_id: id}).exec((err, data) => {
             if (err) reject(err);
             resolve(data);
         });
     });
 }
 
-async function getCaseByID(id){
-    return new Promise(async (resolve,reject) => {
-        await Case.findOne({_id: id}, (err, data) => {
+function getCaseByID(id){
+    return new Promise((resolve,reject) => {
+         Case.findOne({_id: id}).exec((err, data) => {
             if (err) reject(err);
             resolve(data);
-        });
+         });
     });
 }
 
@@ -154,6 +153,7 @@ async function searchPlace(input){
                     json["geometry"] = tmp["geometry"]["location"];
                     json["types"] = tmp["types"];
                 }
+                console.log(json);
                 resolve(json);
             })
         });
@@ -202,36 +202,31 @@ function textSearch(input){
     });
 }
 
-async function findPlace(input){
+function findPlace(input){
     return new Promise(async (resolve,reject) => {
-        var place = 'None';
-        await Place.find({mapName:input}, (err,docs) =>{
+        let place = 'None';
+        await Place.find({mapName:input}).exec(async (err,docs) => {
             if(err) reject(err);
-            console.log("Find place in database");
             place = docs;
-        }).then(()=>{
             if (place.length===0) {
-                searchPlace(input)
-                    .then(x=>savePlace(x))
-                    .then(x=>{
-                    console.log("Find place in API");
-                    resolve([x]);
-                    })
-                    .catch(e=>{
-                        console.log("Err: ",e);
-                        reject(e);
-                });
-                } else {
-                    resolve(place);
-                }
-            });
+                place = await searchPlace(input);
+                let place_res = await savePlace(place);
+                console.log("Find place in API");
+                console.log("x2 is", place);
+                console.log("place_res is: ",place_res)
+                let new_place = await Place.find({mapName:place_res["mapName"]});
+                resolve([place_res]);
+            } else {
+                resolve(place);
+            }
+        });
     });
 };
 
-async function savePlace(place){
+function savePlace(place){
     return new Promise(async (resolve,reject) =>{
         let place_res = null;
-        await Place.findOne({mapID: place["mapID"]},(err,docs)=>{
+        await Place.findOne({mapID: place["mapID"]}).exec(async (err,docs)=>{
             if(err) reject(err);
             if(docs===null || docs.length===0){
                 place_res = new Place(place);
@@ -241,7 +236,6 @@ async function savePlace(place){
             } else {
                 place_res = docs;
             }
-        }).then(()=>{
             resolve(place_res);
         });
     });
@@ -253,7 +247,7 @@ async function savePlace(place){
 // 3 -> fav places
 // 4 -> visited places (have day)
 
-async function setPlace(userID,placeID,type,date=null){
+function setPlace(userID,placeID,type,date=null){
     return new Promise(async (resolve,reject) =>{
         let result = {
             n:0,
@@ -303,18 +297,27 @@ async function setPlace(userID,placeID,type,date=null){
 }
 
 //type is 3 or 4
-async function deletePlace(userID,placeID,type,date=null){
-    if(type===3){
-        const res = await User.updateOne({_id:userID},{$pull:{fav_places:{fav_place:{$in:placeID}}}},null);
-        console.log(res);
-    }
-    if(type===4){
-        const res = await User.updateOne({_id:userID},{$pull:{vis_places:{$and:[{vis_place:{$in:placeID}},{vis_date:{$in:date}}]}}},null);
-        console.log(res);
-    }
+function deletePlace(userID,placeID,type,date=null){
+    return new Promise(async (resolve,reject) =>{
+        let result = {
+            n:0,
+            nModified:0
+        };
+        if(type===3){
+            const res = await User.updateOne({_id:userID},{$pull:{fav_places:{fav_place:{$in:placeID}}}},null);
+            result["n"] = res.n;
+            result["nModified"] = res.nModified;
+        }
+        if(type===4){
+            const res = await User.updateOne({_id:userID},{$pull:{vis_places:{$and:[{vis_place:{$in:placeID}},{vis_date:{$in:date}}]}}},null);
+            result["n"] = res.n;
+            result["nModified"] = res.nModified;
+        }
+        resolve(result);
+    });
 }
 
-async function findPlaceType(type){
+function findPlaceType(type){
     return new Promise(async (resolve,reject) =>{
         await Place.find({types:type},(err,docs)=>{
             if(err) reject(err);
@@ -323,60 +326,47 @@ async function findPlaceType(type){
     });
 }
 
-async function addCase(new_case){
+function addCase(new_case){
     return new Promise(async (resolve,reject)=>{
         let flag = false;
-        var place_name = new_case["place_and_date"]["place"];
-        await findPlace(place_name).then(async place =>{
-            // console.log(place);
-            // console.log(place.length);
-            if(place.length===1 && place[0]!==null && place[0]["status"] === "OK"){
-                new_case["place_and_date"]["place"] = place[0]["_id"];
-            } else {
-                console.log("The place is not correct: ", place_name, new_case);
-                // console.log("The place may have lots of results: ", place_name);
-                flag = true;
+        let place_name = new_case["place_and_date"]["place"];
+        console.log(place_name);
+        let place = await findPlace(place_name);
+        if(place.length===1 && place[0]!==null && place[0]["status"] === "OK"){
+            new_case["place_and_date"]["place"] = place[0]["_id"];
+        } else {
+            reject("The place name may incorrect: ",place_name);
+        }
+        let newcaseID = null;
+        let res = await Case.findOne({"case_id":new_case["case_id"]}).exec();
+        if(res === null){
+            let newcase = new Case(new_case);
+            newcaseID = newcase["_id"];
+            await newcase.save(err=>{
+                reject(err);
+            });
+        } else {
+            newcaseID = res["_id"];
+            let rres = await Case.findOne({"case_id":new_case["case_id"],
+                    "place_and_date.place":new_case["place_and_date"]["place"],
+                    "place_and_date.start_date":new_case["place_and_date"]["start_date"],
+                    "place_and_date.end_date":new_case["place_and_date"]["end_date"]}).exec();
+            if(rres === null){
+                const ures = await Case.updateOne({"case_id":new_case["case_id"]},{$addToSet:{place_and_date:new_case["place_and_date"]}});
+                console.log("Case updated result: ",ures.n, ures.nModified);
             }
-            if(!flag){
-                let caseID = null;
-                await Case.findOne({"case_id":new_case["case_id"]},async (err,docs)=>{
-                    if(docs===null || docs.length===0){
-                        let newcase = new Case(new_case);
-                        caseID = newcase["_id"];
-                        console.log("Case ID 1: ",caseID);
-                        newcase.save(err=>{
-                            console.log(err);
-                        });
-                        resolve(caseID);
-                    }else{
-                        console.log("Case ID 2: ",caseID);
-                        await Case.findOne({"case_id":new_case["case_id"],
-                            "place_and_date.place":new_case["place_and_date"]["place"],
-                            "place_and_date.start_date":new_case["place_and_date"]["start_date"],
-                            "place_and_date.end_date":new_case["place_and_date"]["end_date"]
-                        }, async (err,docs)=>{
-                                if(docs===null || docs.length===0){
-                                    const res = await Case.updateOne({"case_id":new_case["case_id"]},{$addToSet:{place_and_date:new_case["place_and_date"]}});
-                                    console.log("Place updated result: ", res.n,res.nModified);
-                                }
-                        });
-                        resolve(caseID);
-                    };
-                }).then(async (caseID)=>{
-                    console.log("Check Case ID is:",caseID);
-                    const res = await Place.updateOne({_id:place[0]["_id"]},{
-                        flag:true,
-                        $addToSet:{cases:caseID}
-                    });
-                    console.log("Place updated result", res.n, res.nModified);
-                    resolve(true);
-                })
-            } else {
-                resolve(false);
-            }
+        }
+        console.log(newcaseID);
+        // Update place info
+        const pres = await Place.updateOne({_id:place[0]["_id"]},{
+            flag:true,
+            $addToSet:{cases:newcaseID}
         });
+        console.log("Place updated result: ",pres.n, pres.nModified);
+        resolve(true);
     });
 }
+
 //Todo: if flag is true (add date check)
 async function findCaseByGeo1(geo,flag){
     let lat = geo["lat"];
@@ -405,86 +395,94 @@ async function findCaseByGeo(geo,flag){
     let cases = [];
     console.log(new_lat,new_lng);
     return new Promise(async (resolve,reject) => {
-        Place.find({
+        let docs = await Place.find({
             "flag":"true",
             "geometry.lat":{$lt:lat+new_lat,$gt:lat-new_lat},
             "geometry.lng":{$lt:lng+new_lng,$gt:lat-new_lng}
-        },async (err,docs)=>{
-            console.log("Finded: ",docs);
-            for(const place in docs){
-                // console.log(place);
-                console.log(docs[place]);
-                cases[place] = {}
-                cases[place]["mapName"] = docs[place]["mapName"];
-                cases[place]["cases"] = [];
-                const doc_cases = docs[place]["cases"];
-                let tmp = {};
-                for(const item in doc_cases){
-                    console.log(doc_cases[item]);
-                    console.log(doc_cases[item]["_id"]);
-                    await getCaseByID(doc_cases[item]["_id"]).then(x=>{
-                            cases[place]["cases"].push(x);
-                            // console.log("???>",cases);
-                        }
-                    );
-                }
+            }).exec();
+        for(const place in docs){
+            cases[place] = {}
+            cases[place]["mapName"] = docs[place]["mapName"];
+            cases[place]["cases"] = [];
+            let tmp = {};
+            const doc_cases = docs[place]["cases"];
+            for(const item in doc_cases){
+            let x = await getCaseByID(doc_cases[item]["_id"]);
+            cases[place]["cases"].push(x);
             }
-            // console.log(cases);
-        }).then(()=>{
-            console.log(cases);
-            resolve(cases);
-        });
+        }
+        resolve(cases);
     });
 }
 
-// check place and send emails
-async function checkPlace(){
-    for await (const user of User.find()) {
-        let email_res = {};
-        console.log(email_res);
-        email_res["email"] = user["contact_email"];
 
-        // Check Home
-        const home = await getPlaceByID(user["home"]);
-        console.log("home is: ",home);
-        if(home !== null){
-            email_res["home"] = home["mapName"];
-            email_res["home_case"] = await findCaseByGeo(home["geometry"],false);
-        }
+// send emails
+async function sendEmail(user){
+    console.log(user);
+    let email_res = {};
+    console.log(email_res);
+    email_res["email"] = user["contact_email"];
 
-        //Check Work
-        const work = await getPlaceByID(user["work"]);
-        console.log("work is: ",work);
-        if(work!== null) {
-            email_res["work"] = work["mapName"];
-            email_res["work_case"] = await findCaseByGeo(work["geometry"], false);
-        }
-        //Check email
-        email_res["fav_places"] = {}
-        // user["fav_places"].forEach((item)=>{
-        //    console.log(item);
-        //     const fav = await getPlaceByID(item["fav_place"]);
-        // });
-        for (const place in user["fav_places"]){
-           const fav = await getPlaceByID(user["fav_places"][place]["fav_place"]);
+    // Check Home
+    const home = await getPlaceByID(user["home"]);
+    console.log ("home is: ",home);
+    if(home !== null){
+        email_res["home"] = home["mapName"];
+        email_res["home_case"] = await findCaseByGeo(home["geometry"],false);
+    }
+
+    //Check Work
+    const work = await getPlaceByID(user["work"]);
+    // console.log("work is: ",work);
+    if(work!== null) {
+        email_res["work"] = work["mapName"];
+        email_res["work_case"] = await findCaseByGeo(work["geometry"], false);
+    }
+    //Check Fav
+    email_res["fav_places"] = {}
+    for (const place in user["fav_places"]){
+        const fav = await getPlaceByID(user["fav_places"][place]["fav_place"]);
+        if(fav["flag"]===true){
             email_res["fav_places"][place] = {};
             email_res["fav_places"][place]["mapName"] = fav["mapName"];
             email_res["fav_places"][place]["flag"] = fav["flag"];
             email_res["fav_places"][place]["cases"] = fav["cases"];
         }
-        for (const place in user["vis_places"]){
-            console.log(place);
-            const fav = await getPlaceByID(user["vis_places"][place]["vis_place"]);
-            console.log(fav);
-            const p = fav["cases"];
+    }
+    email_res["vis_places"] = {}
+    for (const place in user["vis_places"]){
+        const vis = await getPlaceByID(user["vis_places"][place]["vis_place"]);
+        if(vis["flag"]===true){
+            const p = vis["cases"];
             const d = user["vis_places"][place]["vis_date"];
             console.log(p,d);
-            // email_res["vis_places"][place] = {};
-            // email_res["vis_places"][place]["mapName"] = fav["mapName"];
-            // email_res["vis_places"][place]["flag"] = fav["flag"];
-            // email_res["vis_places"][place]["cases"] = fav["cases"];
+            email_res["vis_places"][place] = {};
+            email_res["vis_places"][place]["mapName"] = vis["mapName"];
+            email_res["vis_places"][place]["flag"] = vis["flag"];
+            email_res["vis_places"][place]["cases"] = vis["cases"];
         }
-        email.emailSending(email_res);
+    }
+    // console.log(email_res);
+    email.emailSending(email_res);
+    console.log("Email Debug: ");
+    console.log(email_res["email"]);
+    console.log(email_res["home"]);
+    console.log(email_res["home_case"]);
+    if(email_res["home_case"]){
+        for(const items in email_res["home_case"]){
+            console.log(email_res["home_case"][items]);
+            if(email_res["home_case"][items]===null) continue;
+            for(const cases in email_res["home_case"][items]["cases"]){
+               console.log(cases);
+            }
+        }
+    }
+}
+
+// check place and send emails
+async function checkPlace(){
+    for (const user of User.find()) {
+        await sendEmail(user);
     }
 }
 
@@ -518,10 +516,12 @@ exports.findPlace = findPlace;
 exports.findPlaceType = findPlaceType;
 exports.searchNearby = searchNearby;
 
+
 // private
 exports.textSearch = textSearch;
 exports.addCase = addCase;
 exports.checkPlace = checkPlace;
+exports.sendEmail = sendEmail;
 
 //getByID
 exports.getPlaceByID = getPlaceByID;
